@@ -1,3 +1,4 @@
+export { ProofManager } from "./ProofManager";
 export { ComplianceDefinitionABI } from "./abi/ComplianceDefinition";
 export { getActiveVersion } from "./chain";
 export { fetchCircuit } from "./ipfs";
