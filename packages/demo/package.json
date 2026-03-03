@@ -7,10 +7,14 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@ppc/sdk": "workspace:*"
+    "@ppc/sdk": "workspace:*",
+    "@noir-lang/acvm_js": "1.0.0-beta.18",
+    "@noir-lang/noirc_abi": "1.0.0-beta.18"
   },
   "devDependencies": {
+    "buffer": "^6.0.3",
     "vite": "^6.0.0",
+    "vite-plugin-node-polyfills": "^0.24.0",
     "typescript": "^5.5.0"
   }
 }

@@ -4,10 +4,55 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PPC Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+    h1 { font-size: 1.4rem; margin-bottom: 1.5rem; }
+    label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem; margin-top: 1rem; }
+    input { width: 100%; padding: 0.5rem; font-family: monospace; font-size: 0.85rem; border: 1px solid #ccc; border-radius: 4px; }
+    button { margin-top: 1.25rem; padding: 0.6rem 1.5rem; font-size: 0.9rem; font-weight: 600; border: none; border-radius: 4px; cursor: pointer; background: #2563eb; color: #fff; }
+    button:disabled { background: #94a3b8; cursor: not-allowed; }
+    #status { margin-top: 1rem; font-size: 0.9rem; min-height: 1.4rem; }
+    .output-group { margin-top: 1.25rem; }
+    .output-header { display: flex; justify-content: space-between; align-items: center; }
+    .output-header button { margin: 0; padding: 0.25rem 0.6rem; font-size: 0.75rem; }
+    textarea { width: 100%; margin-top: 0.25rem; padding: 0.5rem; font-family: monospace; font-size: 0.8rem; border: 1px solid #ccc; border-radius: 4px; resize: vertical; background: #f8fafc; }
+  </style>
 </head>
 <body>
   <h1>Privacy-Preserving Compliance Demo</h1>
-  <div id="app"></div>
+
+  <label for="contract">ComplianceDefinition Address</label>
+  <input id="contract" value="0x3e05D540B05F6379A11F3ed61B2065C01e22961a" />
+
+  <label for="rpc">RPC URL</label>
+  <input id="rpc" value="https://sepolia.infura.io/v3/bdcdb866ba08469bba3c7b7dc9173d8a" />
+
+  <label for="ipfs">IPFS URL</label>
+  <input id="ipfs" value="http://localhost:5001" />
+
+  <label for="userAddr">User Address (public input)</label>
+  <input id="userAddr" placeholder="0x..." />
+
+  <button id="generate">Generate Proof</button>
+  <div id="status"></div>
+
+  <div class="output-group">
+    <div class="output-header">
+      <label>Proof</label>
+      <button id="copyProof" style="display:none">Copy</button>
+    </div>
+    <textarea id="proof" rows="4" readonly></textarea>
+  </div>
+
+  <div class="output-group">
+    <div class="output-header">
+      <label>Public Inputs</label>
+      <button id="copyInputs" style="display:none">Copy</button>
+    </div>
+    <textarea id="publicInputs" rows="3" readonly></textarea>
+  </div>
+
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
