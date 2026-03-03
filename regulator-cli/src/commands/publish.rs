@@ -1,4 +1,4 @@
-use alloy::primitives::{Address, FixedBytes, U256};
+use alloy::primitives::{Address, U256};
 use alloy::providers::Provider;
 use anyhow::{bail, Context, Result};
 use serde::Serialize;
@@ -22,6 +22,7 @@ pub struct PublishData {
     pub cid: String,
     pub file_name: String,
     pub ipfs_size: String,
+    pub public_params_cid: Option<String>,
     pub verifier_address: String,
     pub deploy_tx_hash: String,
     pub compliance_definition: String,
@@ -38,7 +39,7 @@ pub async fn run(
     private_key: &str,
     compliance_definition: &str,
     contract_dir: &Path,
-    params_root: &str,
+    public_params: Option<PathBuf>,
     t_start: &str,
     t_end: &str,
     receipts_dir: &Path,
@@ -132,14 +133,28 @@ pub async fn run(
 
     let verification = verification?;
 
-    // 9. Call updateConstraint on the ComplianceDefinition contract
+    // 9. Upload public params to IPFS (if provided)
+    let public_params_cid = if let Some(ref params_file) = public_params {
+        eprintln!("uploading public params to IPFS...");
+        let params_response = ipfs::add_file(ipfs_rpc_url, params_file)
+            .await
+            .with_context(|| {
+                format!(
+                    "failed to upload {} to IPFS at {ipfs_rpc_url}",
+                    params_file.display()
+                )
+            })?;
+        eprintln!("public params uploaded: {}", params_response.hash);
+        Some(params_response.hash)
+    } else {
+        None
+    };
+
+    // 10. Call updateConstraint on the ComplianceDefinition contract
     let cid = &response.hash;
     let cd_addr: Address = compliance_definition
         .parse()
         .with_context(|| format!("invalid compliance definition address: {compliance_definition}"))?;
-    let params_root_bytes: FixedBytes<32> = params_root
-        .parse()
-        .with_context(|| format!("invalid params_root (expected bytes32): {params_root}"))?;
     let t_start_val: U256 = t_start
         .parse()
         .with_context(|| format!("invalid t_start (expected uint256): {t_start}"))?;
@@ -147,12 +162,14 @@ pub async fn run(
         .parse()
         .with_context(|| format!("invalid t_end (expected uint256): {t_end}"))?;
 
+    let public_params_str = public_params_cid.clone().unwrap_or_default();
+
     eprintln!("registering compliance version...");
     let update_tx_hash = eth::call_update_constraint(
         &provider,
         cd_addr,
         deploy_result.deployed_to,
-        params_root_bytes,
+        public_params_str,
         t_start_val,
         t_end_val,
         cid.to_string(),
@@ -164,6 +181,9 @@ pub async fn run(
     println!("deploy_tx_hash={}", deploy_result.transaction_hash);
     println!("update_tx_hash={update_tx_hash}");
     println!("cid={cid}");
+    if let Some(ref pp_cid) = public_params_cid {
+        println!("public_params_cid={pp_cid}");
+    }
     println!("chain_id={chain_id}");
     println!("verification={verification}");
 
@@ -175,6 +195,7 @@ pub async fn run(
         cid: cid.to_string(),
         file_name: response.name,
         ipfs_size: response.size,
+        public_params_cid,
         verifier_address: deploy_result.deployed_to.to_string(),
         deploy_tx_hash: deploy_result.transaction_hash.to_string(),
         compliance_definition: compliance_definition.to_string(),

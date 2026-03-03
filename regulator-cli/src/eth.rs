@@ -14,7 +14,7 @@ sol! {
     contract ComplianceDefinition {
         function updateConstraint(
             address newVerifier,
-            bytes32 newParamsRoot,
+            string calldata newPublicParams,
             uint256 tStart,
             uint256 tEnd,
             string calldata metadataHash
@@ -164,7 +164,7 @@ pub async fn call_update_constraint(
     provider: &(impl Provider<Ethereum> + Clone),
     compliance_definition_addr: Address,
     new_verifier: Address,
-    params_root: FixedBytes<32>,
+    public_params: String,
     t_start: U256,
     t_end: U256,
     metadata_uri: String,
@@ -172,7 +172,7 @@ pub async fn call_update_constraint(
     let contract = ComplianceDefinition::new(compliance_definition_addr, provider);
 
     let pending_tx = contract
-        .updateConstraint(new_verifier, params_root, t_start, t_end, metadata_uri)
+        .updateConstraint(new_verifier, public_params, t_start, t_end, metadata_uri)
         .send()
         .await
         .context("failed to broadcast updateConstraint transaction")?;

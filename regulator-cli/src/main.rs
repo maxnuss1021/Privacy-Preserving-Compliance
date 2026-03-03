@@ -37,8 +37,6 @@ struct Cli {
 
 const UINT256_MAX: &str =
     "115792089237316195423570985008687907853269984665640564039457584007913129639935";
-const BYTES32_ZERO: &str =
-    "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 #[derive(Subcommand)]
 enum Commands {
@@ -68,9 +66,9 @@ enum Commands {
         #[arg(long, value_name = "FILE")]
         verifier_output: Option<PathBuf>,
 
-        /// Merkle root of public parameters (bytes32)
-        #[arg(long, default_value = BYTES32_ZERO)]
-        params_root: String,
+        /// File containing public parameters to upload to IPFS
+        #[arg(long, value_name = "FILE")]
+        public_params: Option<PathBuf>,
 
         /// Block height when this version becomes active
         #[arg(long, default_value = "0")]
@@ -111,9 +109,9 @@ enum Commands {
         #[arg(long, default_value = "verifier-base-contract", value_name = "DIR")]
         contract_dir: PathBuf,
 
-        /// Merkle root of public parameters (bytes32)
-        #[arg(long, default_value = BYTES32_ZERO)]
-        params_root: String,
+        /// File containing public parameters to upload to IPFS
+        #[arg(long, value_name = "FILE")]
+        public_params: Option<PathBuf>,
 
         /// Block height when this version becomes active
         #[arg(long, default_value = "0")]
@@ -158,7 +156,7 @@ async fn main() -> Result<()> {
             regulator,
             contract_dir,
             verifier_output,
-            params_root,
+            public_params,
             t_start,
             t_end,
         } => {
@@ -170,7 +168,7 @@ async fn main() -> Result<()> {
                 &private_key,
                 &regulator,
                 &contract_dir,
-                &params_root,
+                public_params,
                 &t_start,
                 &t_end,
                 &receipts_dir,
@@ -186,7 +184,7 @@ async fn main() -> Result<()> {
             compliance_definition,
             verifier_output,
             contract_dir,
-            params_root,
+            public_params,
             t_start,
             t_end,
         } => {
@@ -198,7 +196,7 @@ async fn main() -> Result<()> {
                 &private_key,
                 &compliance_definition,
                 &contract_dir,
-                &params_root,
+                public_params,
                 &t_start,
                 &t_end,
                 &receipts_dir,

@@ -1,4 +1,4 @@
-use alloy::primitives::{Address, Bytes, FixedBytes, U256};
+use alloy::primitives::{Address, Bytes, U256};
 use alloy::providers::Provider;
 use alloy::sol_types::SolValue;
 use anyhow::{bail, Context, Result};
@@ -24,6 +24,7 @@ pub struct NewComplianceDefinitionData {
     pub rpc_url: String,
     pub source_file: String,
     pub cid: String,
+    pub public_params_cid: Option<String>,
     pub verifier_address: String,
     pub verifier_tx: String,
     pub verifier_verification: String,
@@ -39,7 +40,7 @@ pub async fn run(
     private_key: &str,
     regulator: &str,
     contract_dir: &Path,
-    params_root: &str,
+    public_params: Option<PathBuf>,
     t_start: &str,
     t_end: &str,
     receipts_dir: &Path,
@@ -166,13 +167,28 @@ pub async fn run(
     eprintln!("  Transaction:  {}", verifier_result.transaction_hash);
     eprintln!("  Verification: {verifier_verification}");
 
+    // ── Public Params Upload ──────────────────────────────────────────
+    let public_params_cid = if let Some(ref params_file) = public_params {
+        eprintln!("\nPublic Params Upload");
+        eprintln!("  Uploading {}...", params_file.display());
+        let params_response = ipfs::add_file(ipfs_rpc_url, params_file)
+            .await
+            .with_context(|| {
+                format!(
+                    "failed to upload {} to IPFS at {ipfs_rpc_url}",
+                    params_file.display()
+                )
+            })?;
+        eprintln!("  CID: {}", params_response.hash);
+        Some(params_response.hash)
+    } else {
+        None
+    };
+
     // ── Compliance Registration ──────────────────────────────────────
     eprintln!("\nCompliance Registration");
     let cid = &ipfs_response.hash;
     let cd_addr = cd_result.deployed_to;
-    let params_root_bytes: FixedBytes<32> = params_root
-        .parse()
-        .with_context(|| format!("invalid params_root (expected bytes32): {params_root}"))?;
     let t_start_val: U256 = t_start
         .parse()
         .with_context(|| format!("invalid t_start (expected uint256): {t_start}"))?;
@@ -180,12 +196,14 @@ pub async fn run(
         .parse()
         .with_context(|| format!("invalid t_end (expected uint256): {t_end}"))?;
 
+    let public_params_str = public_params_cid.clone().unwrap_or_default();
+
     eprintln!("  Registering verifier on {cd_addr}...");
     let update_tx_hash = eth::call_update_constraint(
         &provider,
         cd_addr,
         verifier_result.deployed_to,
-        params_root_bytes,
+        public_params_str,
         t_start_val,
         t_end_val,
         cid.to_string(),
@@ -198,6 +216,9 @@ pub async fn run(
     println!("compliance_definition={cd_addr}");
     println!("verifier_address={}", verifier_result.deployed_to);
     println!("cid={cid}");
+    if let Some(ref pp_cid) = public_params_cid {
+        println!("public_params_cid={pp_cid}");
+    }
     println!("chain_id={chain_id}");
 
     let data = NewComplianceDefinitionData {
@@ -209,6 +230,7 @@ pub async fn run(
         rpc_url: rpc_url.to_string(),
         source_file: source_file.display().to_string(),
         cid: cid.to_string(),
+        public_params_cid,
         verifier_address: verifier_result.deployed_to.to_string(),
         verifier_tx: verifier_result.transaction_hash.to_string(),
         verifier_verification: verifier_verification.to_string(),
