@@ -1,0 +1,16 @@
+{
+  "name": "@ppc/demo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@ppc/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0",
+    "typescript": "^5.5.0"
+  }
+}
