@@ -1,0 +1,7 @@
+[package]
+name = "membership"
+type = "bin"
+authors = ["Joss Duff"]
+
+[dependencies]
+merkle = { path = "../merkle" }
