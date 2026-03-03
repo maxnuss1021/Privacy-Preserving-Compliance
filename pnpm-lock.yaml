@@ -19,6 +19,9 @@ importers:
       '@ppc/sdk':
         specifier: workspace:*
         version: link:../sdk
+      viem:
+        specifier: ^2.0.0
+        version: 2.46.3(typescript@5.9.3)
     devDependencies:
       buffer:
         specifier: ^6.0.3

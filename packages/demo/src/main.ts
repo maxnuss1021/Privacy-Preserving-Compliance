@@ -1,6 +1,16 @@
 import initACVM from "@noir-lang/acvm_js";
 import initNoirC from "@noir-lang/noirc_abi";
-import { ProofManager } from "@ppc/sdk";
+import { ProofManager, verifyProof, type ProofResult } from "@ppc/sdk";
+import { createPublicClient, createWalletClient, custom, http } from "viem";
+import { sepolia } from "viem/chains";
+
+declare global {
+  interface Window {
+    ethereum?: {
+      request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+    };
+  }
+}
 
 // ── DOM refs ─────────────────────────────────────────────────────────
 const $contract = document.getElementById("contract") as HTMLInputElement;
@@ -15,6 +25,8 @@ const $publicInputs = document.getElementById(
 ) as HTMLTextAreaElement;
 const $copyProof = document.getElementById("copyProof") as HTMLButtonElement;
 const $copyInputs = document.getElementById("copyInputs") as HTMLButtonElement;
+const $verify = document.getElementById("verify") as HTMLButtonElement;
+const $verifyStatus = document.getElementById("verifyStatus")!;
 
 // ── WASM init ────────────────────────────────────────────────────────
 let wasmReady = false;
@@ -37,6 +49,9 @@ $copyInputs.addEventListener("click", () => {
   navigator.clipboard.writeText($publicInputs.value);
 });
 
+// ── State ────────────────────────────────────────────────────────────
+let lastProofResult: ProofResult | null = null;
+
 // ── Main flow ────────────────────────────────────────────────────────
 $btn.addEventListener("click", async () => {
   $btn.disabled = true;
@@ -44,6 +59,9 @@ $btn.addEventListener("click", async () => {
   $publicInputs.value = "";
   $copyProof.style.display = "none";
   $copyInputs.style.display = "none";
+  $verify.style.display = "none";
+  $verifyStatus.textContent = "";
+  lastProofResult = null;
 
   try {
     setStatus("Initializing WASM...");
@@ -90,11 +108,61 @@ $btn.addEventListener("click", async () => {
     $publicInputs.value = result.publicInputs.join("\n");
     $copyProof.style.display = "inline-block";
     $copyInputs.style.display = "inline-block";
-    setStatus("Done!");
+    lastProofResult = result;
+    $verify.style.display = "inline-block";
+    setStatus("Done! You can now verify the proof on-chain.");
   } catch (err) {
     setStatus(`Error: ${err instanceof Error ? err.message : err}`);
     console.error(err);
   } finally {
     $btn.disabled = false;
+  }
+});
+
+// ── Verify on-chain ──────────────────────────────────────────────────
+$verify.addEventListener("click", async () => {
+  if (!lastProofResult) return;
+  if (!window.ethereum) {
+    $verifyStatus.textContent = "No wallet found. Install MetaMask or another browser wallet.";
+    return;
+  }
+
+  $verify.disabled = true;
+  $verifyStatus.textContent = "Connecting wallet...";
+
+  try {
+    const accounts = (await window.ethereum.request({
+      method: "eth_requestAccounts",
+    })) as `0x${string}`[];
+
+    const walletClient = createWalletClient({
+      account: accounts[0],
+      chain: sepolia,
+      transport: custom(window.ethereum),
+    });
+
+    const publicClient = createPublicClient({
+      chain: sepolia,
+      transport: http($rpc.value.trim()),
+    });
+
+    const contractAddr = $contract.value.trim() as `0x${string}`;
+
+    $verifyStatus.textContent = "Simulating transaction...";
+    $verifyStatus.textContent = "Submitting transaction... (confirm in wallet)";
+
+    const { txHash } = await verifyProof(
+      walletClient,
+      publicClient,
+      contractAddr,
+      lastProofResult,
+    );
+
+    $verifyStatus.textContent = `Verified! tx: ${txHash}`;
+  } catch (err) {
+    $verifyStatus.textContent = `Verification failed: ${err instanceof Error ? err.message : err}`;
+    console.error(err);
+  } finally {
+    $verify.disabled = false;
   }
 });

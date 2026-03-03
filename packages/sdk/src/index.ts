@@ -1,6 +1,6 @@
 export { ProofManager } from "./ProofManager";
 export { ComplianceDefinitionABI } from "./abi/ComplianceDefinition";
-export { getActiveVersion } from "./chain";
+export { getActiveVersion, verifyProof } from "./chain";
 export { fetchCircuit } from "./ipfs";
 export { generateProof } from "./prove";
 export type { CompiledCircuit } from "@noir-lang/noir_js";

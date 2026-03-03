@@ -1,6 +1,6 @@
-import { createPublicClient, http } from "viem";
+import { createPublicClient, http, type PublicClient, type WalletClient } from "viem";
 import { ComplianceDefinitionABI } from "./abi/ComplianceDefinition";
-import type { ComplianceVersion } from "./types";
+import type { ComplianceVersion, ProofResult } from "./types";
 
 export async function getActiveVersion(
   rpcUrl: string,
@@ -21,4 +21,35 @@ export async function getActiveVersion(
     tEnd: result.tEnd,
     metadataHash: result.metadataHash,
   };
+}
+
+export async function verifyProof(
+  walletClient: WalletClient,
+  publicClient: PublicClient,
+  contractAddress: `0x${string}`,
+  result: ProofResult,
+): Promise<{ txHash: `0x${string}` }> {
+  const account = walletClient.account;
+  if (!account) throw new Error("WalletClient has no account");
+
+  await publicClient.simulateContract({
+    address: contractAddress,
+    abi: ComplianceDefinitionABI,
+    functionName: "verify",
+    args: [result.proof, result.publicInputs],
+    account,
+  });
+
+  const txHash = await walletClient.writeContract({
+    address: contractAddress,
+    abi: ComplianceDefinitionABI,
+    functionName: "verify",
+    args: [result.proof, result.publicInputs],
+    account,
+    chain: walletClient.chain,
+  });
+
+  await publicClient.waitForTransactionReceipt({ hash: txHash });
+
+  return { txHash };
 }

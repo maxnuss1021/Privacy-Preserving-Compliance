@@ -9,7 +9,8 @@
   "dependencies": {
     "@ppc/sdk": "workspace:*",
     "@noir-lang/acvm_js": "1.0.0-beta.18",
-    "@noir-lang/noirc_abi": "1.0.0-beta.18"
+    "@noir-lang/noirc_abi": "1.0.0-beta.18",
+    "viem": "^2.0.0"
   },
   "devDependencies": {
     "buffer": "^6.0.3",
