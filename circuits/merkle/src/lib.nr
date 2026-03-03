@@ -1,20 +1,18 @@
-use dep::std::hash::poseidon;
+use poseidon::poseidon::bn254;
 
 // https://github.com/noir-lang/noir/blob/master/noir_stdlib/src/merkle.nr
 // instead of pedersen hash we use poseidon hash
 pub fn compute_merkle_root<let N: u32>(leaf: Field, index: Field, hash_path: [Field; N]) -> Field {
-    // let n = hash_path.len();
-    // let index_bits = index.to_le_bits();
     let index_bits: [u1; N] = index.to_le_bits();
     let mut current = leaf;
     for i in 0..N {
-        let path_bit = index_bits[i] as bool;
+        let path_bit = index_bits[i] != 0;
         let (hash_left, hash_right) = if path_bit {
             (hash_path[i], current)
         } else {
             (current, hash_path[i])
         };
-        current = poseidon::bn254::hash_2([hash_left, hash_right]);
+        current = bn254::hash_2([hash_left, hash_right]);
     }
     current
 }
@@ -27,7 +25,7 @@ fn test_compute_merkle_root_simple() {
 
     let leaf_neighbor = 0x0000000000000000000000000000000000000000000000000000000000000000;
 
-    let real_root = poseidon::bn254::hash_2([leaf, leaf_neighbor]);
+    let real_root = bn254::hash_2([leaf, leaf_neighbor]);
 
     let hash_path = [0x0000000000000000000000000000000000000000000000000000000000000000];
 

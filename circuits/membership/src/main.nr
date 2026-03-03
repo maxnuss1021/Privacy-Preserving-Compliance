@@ -1,4 +1,5 @@
-use dep::merkle::compute_merkle_root;
+use merkle::compute_merkle_root;
+use poseidon::poseidon::bn254;
 
 // Merkle membership proof.
 // Proves that `address` is a leaf in the Merkle tree with the given `root`,
@@ -18,17 +19,17 @@ fn main(
 
 #[test]
 fn test_membership() {
-    use dep::std::hash::poseidon;
-
-    // Build a depth-1 tree: two leaves, root = hash(leaf0, leaf1)
+    // Sparse depth-32 tree: address at index 0, all siblings zero.
+    // Compute the root by hashing up all 32 levels.
     let address = 0x00000000000000000000000000000000000000000000000000000068694a6f7373;
-    let sibling = 0x0000000000000000000000000000000000000000000000000000000000000000;
+    let hash_path = [0; 32];
 
-    let root = poseidon::bn254::hash_2([address, sibling]);
-
-    // Pad hash_path to 32 with zeros (only first element matters for depth-1)
-    let mut hash_path = [0; 32];
-    hash_path[0] = sibling;
+    // Walk up the tree: at each level, hash(current, 0)
+    let mut current = address;
+    for i in 0..32 {
+        current = bn254::hash_2([current, hash_path[i]]);
+    }
+    let root = current;
 
     main(address, 0, hash_path, root);
 }
