@@ -2,14 +2,14 @@
 export interface ProofManagerConfig {
   /** Ethereum JSON-RPC URL (e.g., Sepolia Infura endpoint) */
   rpcUrl: string;
-  /** Kubo RPC API URL (e.g., http://localhost:5001) */
-  ipfsUrl: string;
+  /** IPFS gateway URL (e.g., http://localhost:8080) */
+  ipfsGatewayUrl: string;
 }
 
 /** On-chain ComplianceVersion struct */
 export interface ComplianceVersion {
   verifier: `0x${string}`;
-  paramsRoot: `0x${string}`;
+  merkleRoot: `0x${string}`;
   tStart: bigint;
   tEnd: bigint;
   metadataHash: string;

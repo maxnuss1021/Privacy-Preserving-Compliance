@@ -69,7 +69,7 @@ $btn.addEventListener("click", async () => {
 
     const pm = new ProofManager({
       rpcUrl: $rpc.value.trim(),
-      ipfsUrl: $ipfs.value.trim(),
+      ipfsGatewayUrl: $ipfs.value.trim(),
     });
 
     const contractAddr = $contract.value.trim() as `0x${string}`;

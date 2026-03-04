@@ -22,7 +22,7 @@ export class ProofManager {
   }
 
   async fetchCircuit(metadataHash: string): Promise<CompiledCircuit> {
-    return fetchCircuit(this.config.ipfsUrl, metadataHash);
+    return fetchCircuit(this.config.ipfsGatewayUrl, metadataHash);
   }
 
   async prove(

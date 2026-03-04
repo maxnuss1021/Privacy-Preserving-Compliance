@@ -1,49 +1,51 @@
 import type { CompiledCircuit } from "@noir-lang/noir_js";
 
-interface IpfsLsResponse {
-  Objects: { Links: { Name: string; Hash: string; Size: number }[] }[];
-}
-
-async function ipfsPost(ipfsUrl: string, endpoint: string): Promise<Response> {
-  const url = `${ipfsUrl}${endpoint}`;
-  let res: Response;
-  try {
-    res = await fetch(url, { method: "POST" });
-  } catch (err) {
-    throw new Error(
-      `IPFS node unreachable at ${ipfsUrl}: ${err instanceof Error ? err.message : err}`,
-    );
-  }
-  if (!res.ok) {
-    let detail: string;
-    try {
-      const body = await res.json();
-      detail = body.Message ?? JSON.stringify(body);
-    } catch {
-      detail = await res.text();
-    }
-    throw new Error(`IPFS ${endpoint} failed: ${detail}`);
-  }
-  return res;
-}
-
+/**
+ * Fetch a compiled Noir circuit artifact from an IPFS gateway.
+ *
+ * Expects the CID to point to a directory containing a `.json` compiled
+ * circuit artifact (the output of `nargo compile`).  The directory is
+ * listed via the gateway's built-in JSON directory listing, and the first
+ * `.json` file found is fetched and validated.
+ */
 export async function fetchCircuit(
-  ipfsUrl: string,
+  gatewayUrl: string,
   metadataHash: string,
 ): Promise<CompiledCircuit> {
-  const baseUrl = ipfsUrl.replace(/\/+$/, "");
+  const baseUrl = gatewayUrl.replace(/\/+$/, "");
 
   // Strip /ipfs/ prefix if present
   const cid = metadataHash.startsWith("/ipfs/")
     ? metadataHash.slice(6)
     : metadataHash;
 
-  // List directory contents to find the compiled .json artifact
-  const lsRes = await ipfsPost(baseUrl, `/api/v0/ls?arg=${cid}`);
-  const listing: IpfsLsResponse = await lsRes.json();
-  const links = listing.Objects?.[0]?.Links ?? [];
-  const jsonFile = links.find((l) => l.Name.endsWith(".json"));
+  // List directory contents via the gateway's JSON directory listing
+  let links: { Name: string; Hash: string; Size: number }[];
+  try {
+    const lsRes = await fetch(
+      `${baseUrl}/ipfs/${cid}/?format=dag-json`,
+      {
+        headers: { Accept: "application/vnd.ipld.dag-json" },
+      },
+    );
+    if (!lsRes.ok) {
+      throw new Error(`HTTP ${lsRes.status}: ${await lsRes.text()}`);
+    }
+    const dag = await lsRes.json();
+    links = (dag.Links ?? []).map(
+      (l: { Name: string; Hash: { "/": string }; Tsize: number }) => ({
+        Name: l.Name,
+        Hash: l.Hash["/"],
+        Size: l.Tsize,
+      }),
+    );
+  } catch (err) {
+    throw new Error(
+      `Failed to list IPFS directory ${cid} from ${baseUrl}: ${err instanceof Error ? err.message : err}`,
+    );
+  }
 
+  const jsonFile = links.find((l) => l.Name.endsWith(".json"));
   if (!jsonFile) {
     throw new Error(
       `No .json circuit artifact found in IPFS directory ${cid}. ` +
@@ -51,12 +53,19 @@ export async function fetchCircuit(
     );
   }
 
-  // Fetch the compiled circuit JSON
-  const catRes = await ipfsPost(
-    baseUrl,
-    `/api/v0/cat?arg=${cid}/${jsonFile.Name}`,
-  );
-  const circuit: CompiledCircuit = await catRes.json();
+  // Fetch the compiled circuit JSON via the gateway
+  let circuit: CompiledCircuit;
+  try {
+    const catRes = await fetch(`${baseUrl}/ipfs/${cid}/${jsonFile.Name}`);
+    if (!catRes.ok) {
+      throw new Error(`HTTP ${catRes.status}: ${await catRes.text()}`);
+    }
+    circuit = await catRes.json();
+  } catch (err) {
+    throw new Error(
+      `Failed to fetch ${jsonFile.Name} from IPFS (${cid}): ${err instanceof Error ? err.message : err}`,
+    );
+  }
 
   if (!circuit.bytecode || !circuit.abi) {
     throw new Error(

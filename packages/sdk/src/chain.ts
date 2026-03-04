@@ -16,7 +16,7 @@ export async function getActiveVersion(
 
   return {
     verifier: result.verifier,
-    paramsRoot: result.paramsRoot,
+    merkleRoot: result.merkleRoot,
     tStart: result.tStart,
     tEnd: result.tEnd,
     metadataHash: result.metadataHash,
@@ -36,7 +36,7 @@ export async function verifyProof(
     address: contractAddress,
     abi: ComplianceDefinitionABI,
     functionName: "verify",
-    args: [result.proof, result.publicInputs],
+    args: [result.proof],
     account,
   });
 
@@ -44,7 +44,7 @@ export async function verifyProof(
     address: contractAddress,
     abi: ComplianceDefinitionABI,
     functionName: "verify",
-    args: [result.proof, result.publicInputs],
+    args: [result.proof],
     account,
     chain: walletClient.chain,
   });

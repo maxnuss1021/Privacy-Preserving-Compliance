@@ -10,7 +10,7 @@ export const ComplianceDefinitionABI = [
         internalType: "struct ComplianceDefinition.ComplianceVersion",
         components: [
           { name: "verifier", type: "address", internalType: "address" },
-          { name: "paramsRoot", type: "bytes32", internalType: "bytes32" },
+          { name: "merkleRoot", type: "bytes32", internalType: "bytes32" },
           { name: "tStart", type: "uint256", internalType: "uint256" },
           { name: "tEnd", type: "uint256", internalType: "uint256" },
           { name: "metadataHash", type: "string", internalType: "string" },
@@ -32,7 +32,7 @@ export const ComplianceDefinitionABI = [
         internalType: "struct ComplianceDefinition.ComplianceVersion",
         components: [
           { name: "verifier", type: "address", internalType: "address" },
-          { name: "paramsRoot", type: "bytes32", internalType: "bytes32" },
+          { name: "merkleRoot", type: "bytes32", internalType: "bytes32" },
           { name: "tStart", type: "uint256", internalType: "uint256" },
           { name: "tEnd", type: "uint256", internalType: "uint256" },
           { name: "metadataHash", type: "string", internalType: "string" },
@@ -53,7 +53,6 @@ export const ComplianceDefinitionABI = [
     name: "verify",
     inputs: [
       { name: "proof", type: "bytes", internalType: "bytes" },
-      { name: "publicInputs", type: "bytes32[]", internalType: "bytes32[]" },
     ],
     outputs: [{ name: "", type: "bool", internalType: "bool" }],
     stateMutability: "nonpayable",
@@ -64,7 +63,7 @@ export const ComplianceDefinitionABI = [
     inputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     outputs: [
       { name: "verifier", type: "address", internalType: "address" },
-      { name: "paramsRoot", type: "bytes32", internalType: "bytes32" },
+      { name: "merkleRoot", type: "bytes32", internalType: "bytes32" },
       { name: "tStart", type: "uint256", internalType: "uint256" },
       { name: "tEnd", type: "uint256", internalType: "uint256" },
       { name: "metadataHash", type: "string", internalType: "string" },
