@@ -48,6 +48,10 @@ enum Commands {
         #[arg(value_name = "DIR")]
         path: PathBuf,
 
+        /// Human-readable name for this compliance definition
+        #[arg(long)]
+        name: String,
+
         /// RPC URL of the target chain
         #[arg(long, env = "RPC_URL")]
         rpc_url: String,
@@ -161,6 +165,7 @@ async fn main() -> Result<()> {
     match cli.command {
         Commands::NewComplianceDefinition {
             path,
+            name,
             rpc_url,
             private_key,
             regulator,
@@ -173,6 +178,7 @@ async fn main() -> Result<()> {
         } => {
             commands::new_compliance_definition::run(
                 path,
+                &name,
                 verifier_output,
                 &ipfs_url,
                 &rpc_url,

@@ -14,6 +14,7 @@ declare global {
 
 // ── DOM refs ─────────────────────────────────────────────────────────
 const $contract = document.getElementById("contract") as HTMLInputElement;
+const $contractName = document.getElementById("contractName")!;
 const $rpc = document.getElementById("rpc") as HTMLInputElement;
 const $ipfs = document.getElementById("ipfs") as HTMLInputElement;
 const $userAddr = document.getElementById("userAddr") as HTMLInputElement;
@@ -48,6 +49,28 @@ $copyProof.addEventListener("click", () => {
 });
 $copyInputs.addEventListener("click", () => {
   navigator.clipboard.writeText($publicInputs.value);
+});
+
+// ── Fetch contract name on address change ───────────────────────────
+let nameDebounce: ReturnType<typeof setTimeout>;
+$contract.addEventListener("input", () => {
+  clearTimeout(nameDebounce);
+  $contractName.textContent = "";
+  const addr = $contract.value.trim();
+  if (!addr.match(/^0x[0-9a-fA-F]{40}$/)) return;
+
+  nameDebounce = setTimeout(async () => {
+    try {
+      const pm = new ProofManager({
+        rpcUrl: $rpc.value.trim(),
+        ipfsGatewayUrl: $ipfs.value.trim(),
+      });
+      const name = await pm.getName(addr as `0x${string}`);
+      $contractName.textContent = name;
+    } catch {
+      $contractName.textContent = "";
+    }
+  }, 400);
 });
 
 // ── Connect wallet ──────────────────────────────────────────────────

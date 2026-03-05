@@ -15,6 +15,7 @@ contract ComplianceDefinition {
 
     ComplianceVersion[] public versions;
     address public regulator;
+    string public name;
 
     error NotRegulator();
     error NoActiveVersion();
@@ -25,8 +26,9 @@ contract ComplianceDefinition {
         _;
     }
 
-    constructor(address _regulator) {
+    constructor(address _regulator, string memory _name) {
         regulator = _regulator;
+        name = _name;
     }
 
     function verify(bytes calldata proof) external returns (bool) {

@@ -1,6 +1,13 @@
 export const ComplianceDefinitionABI = [
   {
     type: "function",
+    name: "name",
+    inputs: [],
+    outputs: [{ name: "", type: "string", internalType: "string" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "getActiveVersion",
     inputs: [],
     outputs: [

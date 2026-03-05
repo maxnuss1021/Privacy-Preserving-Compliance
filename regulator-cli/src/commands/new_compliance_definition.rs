@@ -16,6 +16,7 @@ use crate::receipt::Receipt;
 
 #[derive(Debug, Serialize)]
 pub struct NewComplianceDefinitionData {
+    pub name: String,
     pub compliance_definition_address: String,
     pub compliance_definition_tx: String,
     pub compliance_definition_verification: String,
@@ -36,6 +37,7 @@ pub struct NewComplianceDefinitionData {
 #[allow(clippy::too_many_arguments)]
 pub async fn run(
     path: PathBuf,
+    name: &str,
     verifier_output: Option<PathBuf>,
     ipfs_rpc_url: &str,
     rpc_url: &str,
@@ -79,7 +81,7 @@ pub async fn run(
 
     let cd_artifact =
         forge::artifact_path(contract_dir, "ComplianceDefinition.sol", "ComplianceDefinition");
-    let constructor_args = Bytes::from(regulator_addr.abi_encode());
+    let constructor_args = Bytes::from((regulator_addr, name.to_string()).abi_encode_params());
 
     eprintln!("  Deploying to {network}...");
     let cd_result =
@@ -91,7 +93,7 @@ pub async fn run(
         chain_id,
         &cd_result.deployed_to.to_string(),
         "src/ComplianceDefinition.sol:ComplianceDefinition",
-        Some(&alloy::hex::encode(regulator_addr.abi_encode())),
+        Some(&alloy::hex::encode((regulator_addr, name.to_string()).abi_encode_params())),
         verify,
         "  ",
     )
@@ -221,6 +223,7 @@ pub async fn run(
     println!("chain_id={chain_id}");
 
     let data = NewComplianceDefinitionData {
+        name: name.to_string(),
         compliance_definition_address: cd_addr.to_string(),
         compliance_definition_tx: cd_result.transaction_hash.to_string(),
         compliance_definition_verification: cd_verification.to_string(),

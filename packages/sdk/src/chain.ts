@@ -2,6 +2,19 @@ import { createPublicClient, http, type PublicClient, type WalletClient } from "
 import { ComplianceDefinitionABI } from "./abi/ComplianceDefinition";
 import type { ComplianceVersion, ProofResult } from "./types";
 
+export async function getName(
+  rpcUrl: string,
+  contractAddress: `0x${string}`,
+): Promise<string> {
+  const client = createPublicClient({ transport: http(rpcUrl) });
+
+  return client.readContract({
+    address: contractAddress,
+    abi: ComplianceDefinitionABI,
+    functionName: "name",
+  }) as Promise<string>;
+}
+
 export async function getActiveVersion(
   rpcUrl: string,
   contractAddress: `0x${string}`,

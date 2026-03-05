@@ -1,5 +1,5 @@
 import type { CompiledCircuit } from "@noir-lang/noir_js";
-import { getActiveVersion } from "./chain";
+import { getName, getActiveVersion } from "./chain";
 import { fetchCircuit, fetchLeaves } from "./ipfs";
 import { computeMerkleProofForLeaf, type MerkleProof } from "./merkle";
 import { generateProof } from "./prove";
@@ -15,6 +15,10 @@ export class ProofManager {
 
   constructor(config: ProofManagerConfig) {
     this.config = config;
+  }
+
+  async getName(contractAddress: `0x${string}`): Promise<string> {
+    return getName(this.config.rpcUrl, contractAddress);
   }
 
   async getActiveDefinition(

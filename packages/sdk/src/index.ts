@@ -1,6 +1,6 @@
 export { ProofManager } from "./ProofManager";
 export { ComplianceDefinitionABI } from "./abi/ComplianceDefinition";
-export { getActiveVersion, verifyProof } from "./chain";
+export { getName, getActiveVersion, verifyProof } from "./chain";
 export { fetchCircuit, fetchLeaves } from "./ipfs";
 export { computeMerkleProof, computeMerkleProofForLeaf } from "./merkle";
 export type { MerkleProof } from "./merkle";

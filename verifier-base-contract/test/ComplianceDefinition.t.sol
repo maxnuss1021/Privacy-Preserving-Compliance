@@ -47,7 +47,7 @@ contract ComplianceDefinitionTest is Test {
     address public nonRegulator = address(0x2);
 
     function setUp() public {
-        cd = new ComplianceDefinition(regulator);
+        cd = new ComplianceDefinition(regulator, "Test Compliance");
         mockVerifier = new MockVerifier();
     }
 
@@ -55,6 +55,10 @@ contract ComplianceDefinitionTest is Test {
 
     function test_regulatorIsSet() public view {
         assertEq(cd.regulator(), regulator);
+    }
+
+    function test_nameIsSet() public view {
+        assertEq(cd.name(), "Test Compliance");
     }
 
     function test_startsWithNoVersions() public view {
