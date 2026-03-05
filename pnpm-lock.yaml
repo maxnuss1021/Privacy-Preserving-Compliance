@@ -50,6 +50,9 @@ importers:
       '@noir-lang/noirc_abi':
         specifier: 1.0.0-beta.18
         version: 1.0.0-beta.18
+      '@zkpassport/poseidon2':
+        specifier: ^0.6.2
+        version: 0.6.2
       viem:
         specifier: ^2.0.0
         version: 2.46.3(typescript@5.9.3)
@@ -603,6 +606,9 @@ packages:
 
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
+
+  '@zkpassport/poseidon2@0.6.2':
+    resolution: {integrity: sha512-6sFHX9kAcrmDmBEEndvjZ8DA9FomunirQ5oCV6oD7bqr/lP0n0OBSRn86SZgQBXwRR+vq7sk16y31OgRBIOJ5Q==}
 
   abitype@1.2.3:
     resolution: {integrity: sha512-Ofer5QUnuUdTFsBRwARMoWKOH1ND5ehwYhJ3OJ/BQO+StkwQjHw0XyVh4vDttzHB7QOFhPHa/o413PJ82gU/Tg==}
@@ -1740,6 +1746,8 @@ snapshots:
       '@scure/base': 1.2.6
 
   '@types/estree@1.0.8': {}
+
+  '@zkpassport/poseidon2@0.6.2': {}
 
   abitype@1.2.3(typescript@5.9.3):
     optionalDependencies:

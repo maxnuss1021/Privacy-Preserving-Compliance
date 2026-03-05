@@ -30,6 +30,7 @@ pub struct NewComplianceDefinitionData {
     pub verifier_tx: String,
     pub verifier_verification: String,
     pub update_tx: String,
+    pub leaves_cid: String,
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -44,6 +45,7 @@ pub async fn run(
     merkle_root: &str,
     t_start: &str,
     t_end: &str,
+    leaves_file: Option<PathBuf>,
     receipts_dir: &Path,
     verify: &VerifyArgs,
 ) -> Result<()> {
@@ -130,6 +132,20 @@ pub async fn run(
     })?;
     eprintln!("  CID: {}", ipfs_response.hash);
 
+    // ── Leaves Upload ────────────────────────────────────────────────
+    let leaves_cid = if let Some(ref leaves_path) = leaves_file {
+        eprintln!("  Uploading leaves file {}...", leaves_path.display());
+        let leaves_response = ipfs::add_file(ipfs_rpc_url, leaves_path)
+            .await
+            .with_context(|| {
+                format!("failed to upload leaves file to IPFS at {ipfs_rpc_url}")
+            })?;
+        eprintln!("  Leaves CID: {}", leaves_response.hash);
+        leaves_response.hash
+    } else {
+        String::new()
+    };
+
     // ── HonkVerifier Contract ────────────────────────────────────────
     eprintln!("\nHonkVerifier Contract");
     let deploy_verifier_path = contract_dir.join("src/Verifier.sol");
@@ -191,6 +207,7 @@ pub async fn run(
         t_start_val,
         t_end_val,
         cid.to_string(),
+        leaves_cid.clone(),
     )
     .await?;
     eprintln!("  Transaction:  {update_tx_hash}");
@@ -218,6 +235,7 @@ pub async fn run(
         verifier_tx: verifier_result.transaction_hash.to_string(),
         verifier_verification: verifier_verification.to_string(),
         update_tx: update_tx_hash.to_string(),
+        leaves_cid,
     };
 
     let receipt = Receipt::new("new-compliance-definition", data);

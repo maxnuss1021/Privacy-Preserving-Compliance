@@ -76,3 +76,31 @@ export async function fetchCircuit(
 
   return circuit;
 }
+
+/**
+ * Fetch a leaves JSON file from IPFS (a single file, not a directory).
+ *
+ * Expects the CID to point to a JSON array of hex strings: `["0x...", ...]`.
+ * Returns the parsed array as `bigint[]`.
+ */
+export async function fetchLeaves(
+  gatewayUrl: string,
+  leavesCid: string,
+): Promise<bigint[]> {
+  const baseUrl = gatewayUrl.replace(/\/+$/, "");
+  const cid = leavesCid.startsWith("/ipfs/") ? leavesCid.slice(6) : leavesCid;
+
+  const res = await fetch(`${baseUrl}/ipfs/${cid}`);
+  if (!res.ok) {
+    throw new Error(
+      `Failed to fetch leaves from IPFS (${cid}): HTTP ${res.status}`,
+    );
+  }
+
+  const arr: string[] = await res.json();
+  if (!Array.isArray(arr)) {
+    throw new Error(`Leaves CID ${cid} did not contain a JSON array`);
+  }
+
+  return arr.map((v) => BigInt(v));
+}

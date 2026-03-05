@@ -79,6 +79,10 @@ enum Commands {
         /// Block height when this version expires
         #[arg(long, default_value = UINT256_MAX)]
         t_end: String,
+
+        /// JSON file containing merkle tree leaves to upload to IPFS
+        #[arg(long, value_name = "FILE")]
+        leaves_file: Option<PathBuf>,
     },
     /// Initialize a new Noir compliance definition project
     Init {
@@ -122,6 +126,10 @@ enum Commands {
         /// Block height when this version expires
         #[arg(long, default_value = UINT256_MAX)]
         t_end: String,
+
+        /// JSON file containing merkle tree leaves to upload to IPFS
+        #[arg(long, value_name = "FILE")]
+        leaves_file: Option<PathBuf>,
     },
     /// Update an existing compliance definition TODO
     Update,
@@ -161,6 +169,7 @@ async fn main() -> Result<()> {
             merkle_root,
             t_start,
             t_end,
+            leaves_file,
         } => {
             commands::new_compliance_definition::run(
                 path,
@@ -173,6 +182,7 @@ async fn main() -> Result<()> {
                 &merkle_root,
                 &t_start,
                 &t_end,
+                leaves_file,
                 &receipts_dir,
                 &verify,
             )
@@ -189,6 +199,7 @@ async fn main() -> Result<()> {
             merkle_root,
             t_start,
             t_end,
+            leaves_file,
         } => {
             commands::publish::run(
                 path,
@@ -201,6 +212,7 @@ async fn main() -> Result<()> {
                 &merkle_root,
                 &t_start,
                 &t_end,
+                leaves_file,
                 &receipts_dir,
                 &verify,
             )

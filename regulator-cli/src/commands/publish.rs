@@ -27,6 +27,7 @@ pub struct PublishData {
     pub compliance_definition: String,
     pub update_tx_hash: String,
     pub verification_status: String,
+    pub leaves_cid: String,
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -41,6 +42,7 @@ pub async fn run(
     merkle_root: &str,
     t_start: &str,
     t_end: &str,
+    leaves_file: Option<PathBuf>,
     receipts_dir: &Path,
     verify: &VerifyArgs,
 ) -> Result<()> {
@@ -91,6 +93,20 @@ pub async fn run(
         format!("failed to upload circuit files to IPFS at {ipfs_rpc_url}")
     })?;
     eprintln!("uploaded to IPFS");
+
+    // 5b. Upload leaves file if provided
+    let leaves_cid = if let Some(ref leaves_path) = leaves_file {
+        eprintln!("uploading leaves file {}...", leaves_path.display());
+        let leaves_response = ipfs::add_file(ipfs_rpc_url, leaves_path)
+            .await
+            .with_context(|| {
+                format!("failed to upload leaves file to IPFS at {ipfs_rpc_url}")
+            })?;
+        eprintln!("leaves uploaded to IPFS: {}", leaves_response.hash);
+        leaves_response.hash
+    } else {
+        String::new()
+    };
 
     // 6. Temporarily copy Verifier.sol into the Foundry project so forge can compile it
     let deploy_verifier_path = contract_dir.join("src/Verifier.sol");
@@ -158,6 +174,7 @@ pub async fn run(
         t_start_val,
         t_end_val,
         cid.to_string(),
+        leaves_cid.clone(),
     )
     .await?;
     eprintln!("compliance version registered");
@@ -183,6 +200,7 @@ pub async fn run(
         compliance_definition: compliance_definition.to_string(),
         update_tx_hash: update_tx_hash.to_string(),
         verification_status: verification.to_string(),
+        leaves_cid,
     };
 
     let receipt = Receipt::new("publish", data);

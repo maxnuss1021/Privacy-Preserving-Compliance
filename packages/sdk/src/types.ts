@@ -13,6 +13,7 @@ export interface ComplianceVersion {
   tStart: bigint;
   tEnd: bigint;
   metadataHash: string;
+  leavesHash: string;
 }
 
 /** Inputs for proof generation */

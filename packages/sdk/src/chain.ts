@@ -20,6 +20,7 @@ export async function getActiveVersion(
     tStart: result.tStart,
     tEnd: result.tEnd,
     metadataHash: result.metadataHash,
+    leavesHash: result.leavesHash,
   };
 }
 

@@ -108,13 +108,31 @@ $btn.addEventListener("click", async () => {
       setStatus("Connect your wallet first — your address is used as a public input.");
       return;
     }
+
+    // Auto-compute merkle proof if leaves are published
+    let merkleProof: { index: string; hashPath: string[]; root: string } | null = null;
+    if (definition.leavesHash) {
+      setStatus("Fetching merkle leaves from IPFS...");
+      try {
+        merkleProof = await pm.computeMerkleProof(
+          definition.leavesHash,
+          BigInt(userAddr),
+        );
+      } catch {
+        setStatus("Your address was not found in the compliance set.");
+        return;
+      }
+    }
+
     for (const param of circuit.abi.parameters) {
       if (param.name === "address") {
-        // address is a public input verified against msg.sender on-chain
         inputs[param.name] = userAddr;
       } else if (param.name === "root") {
-        // merkle root comes from the contract
         inputs[param.name] = definition.merkleRoot;
+      } else if (param.name === "index" && merkleProof) {
+        inputs[param.name] = merkleProof.index;
+      } else if (param.name === "hash_path" && merkleProof) {
+        inputs[param.name] = JSON.stringify(merkleProof.hashPath);
       } else {
         const val = prompt(
           `Enter value for "${param.name}" (${param.visibility}, ${param.type.kind}):`,

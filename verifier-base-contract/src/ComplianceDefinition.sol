@@ -10,6 +10,7 @@ contract ComplianceDefinition {
         uint256 tStart;
         uint256 tEnd;
         string metadataHash;
+        string leavesHash;
     }
 
     ComplianceVersion[] public versions;
@@ -41,7 +42,8 @@ contract ComplianceDefinition {
         bytes32 newMerkleRoot,
         uint256 tStart,
         uint256 tEnd,
-        string calldata metadataHash
+        string calldata metadataHash,
+        string calldata leavesHash
     ) external onlyRegulator {
         versions.push(
             ComplianceVersion({
@@ -49,7 +51,8 @@ contract ComplianceDefinition {
                 merkleRoot: newMerkleRoot,
                 tStart: tStart,
                 tEnd: tEnd,
-                metadataHash: metadataHash
+                metadataHash: metadataHash,
+                leavesHash: leavesHash
             })
         );
     }
@@ -58,7 +61,8 @@ contract ComplianceDefinition {
         bytes32 newMerkleRoot,
         uint256 tStart,
         uint256 tEnd,
-        string calldata metadataHash
+        string calldata metadataHash,
+        string calldata leavesHash
     ) external onlyRegulator {
         ComplianceVersion memory current = getActiveVersion();
         versions.push(
@@ -67,7 +71,8 @@ contract ComplianceDefinition {
                 merkleRoot: newMerkleRoot,
                 tStart: tStart,
                 tEnd: tEnd,
-                metadataHash: metadataHash
+                metadataHash: metadataHash,
+                leavesHash: leavesHash
             })
         );
     }

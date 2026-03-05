@@ -1,5 +1,5 @@
 use merkle::compute_merkle_root;
-use poseidon::poseidon::bn254;
+use poseidon::poseidon2::Poseidon2;
 
 // Merkle membership proof.
 // Proves that `address` is a leaf in the Merkle tree with the given `root`,
@@ -31,7 +31,7 @@ fn test_membership() {
     // Walk up the tree: at each level, hash(current, 0)
     let mut current = address;
     for i in 0..32 {
-        current = bn254::hash_2([current, hash_path[i]]);
+        current = Poseidon2::hash([current, hash_path[i]], 2);
     }
     let root = current;
 

@@ -1,6 +1,7 @@
 import type { CompiledCircuit } from "@noir-lang/noir_js";
 import { getActiveVersion } from "./chain";
-import { fetchCircuit } from "./ipfs";
+import { fetchCircuit, fetchLeaves } from "./ipfs";
+import { computeMerkleProofForLeaf, type MerkleProof } from "./merkle";
 import { generateProof } from "./prove";
 import type {
   ProofManagerConfig,
@@ -30,6 +31,18 @@ export class ProofManager {
     inputs: Record<string, string>,
   ): Promise<ProofResult> {
     return generateProof(circuit, inputs);
+  }
+
+  async fetchLeaves(leavesCid: string): Promise<bigint[]> {
+    return fetchLeaves(this.config.ipfsGatewayUrl, leavesCid);
+  }
+
+  async computeMerkleProof(
+    leavesCid: string,
+    leafValue: bigint,
+  ): Promise<MerkleProof> {
+    const leaves = await this.fetchLeaves(leavesCid);
+    return computeMerkleProofForLeaf(leaves, leafValue);
   }
 
   async generateComplianceProof(

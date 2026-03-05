@@ -17,7 +17,8 @@ sol! {
             bytes32 newMerkleRoot,
             uint256 tStart,
             uint256 tEnd,
-            string calldata metadataHash
+            string calldata metadataHash,
+            string calldata leavesHash
         ) external;
     }
 }
@@ -168,11 +169,12 @@ pub async fn call_update_constraint(
     t_start: U256,
     t_end: U256,
     metadata_uri: String,
+    leaves_hash: String,
 ) -> Result<FixedBytes<32>> {
     let contract = ComplianceDefinition::new(compliance_definition_addr, provider);
 
     let pending_tx = contract
-        .updateConstraint(new_verifier, merkle_root, t_start, t_end, metadata_uri)
+        .updateConstraint(new_verifier, merkle_root, t_start, t_end, metadata_uri, leaves_hash)
         .send()
         .await
         .context("failed to broadcast updateConstraint transaction")?;
