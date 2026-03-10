@@ -20,6 +20,11 @@ sol! {
             string calldata metadataHash,
             string calldata leavesHash
         ) external;
+
+        function updateParams(
+            bytes32 newMerkleRoot,
+            string calldata newLeavesHash
+        ) external;
     }
 }
 
@@ -185,6 +190,30 @@ pub async fn call_update_constraint(
         .get_receipt()
         .await
         .context("updateConstraint transaction failed")?;
+
+    Ok(tx_hash)
+}
+
+pub async fn call_update_params(
+    provider: &(impl Provider<Ethereum> + Clone),
+    compliance_definition_addr: Address,
+    merkle_root: FixedBytes<32>,
+    leaves_hash: String,
+) -> Result<FixedBytes<32>> {
+    let contract = ComplianceDefinition::new(compliance_definition_addr, provider);
+
+    let pending_tx = contract
+        .updateParams(merkle_root, leaves_hash)
+        .send()
+        .await
+        .context("failed to broadcast updateParams transaction")?;
+
+    let tx_hash = *pending_tx.tx_hash();
+
+    pending_tx
+        .get_receipt()
+        .await
+        .context("updateParams transaction failed")?;
 
     Ok(tx_hash)
 }

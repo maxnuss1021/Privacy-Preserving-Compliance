@@ -135,8 +135,28 @@ enum Commands {
         #[arg(long, value_name = "FILE")]
         leaves_file: Option<PathBuf>,
     },
-    /// Update an existing compliance definition TODO
-    Update,
+    /// Update the public parameters of an existing compliance definition
+    UpdateParams {
+        /// Address of the deployed ComplianceDefinition contract
+        #[arg(long)]
+        compliance_definition: String,
+
+        /// RPC URL of the target chain
+        #[arg(long, env = "RPC_URL")]
+        rpc_url: String,
+
+        /// Private key for the regulator account
+        #[arg(long, env = "PRIVATE_KEY")]
+        private_key: String,
+
+        /// New Merkle root of the public parameter set (bytes32)
+        #[arg(long)]
+        merkle_root: String,
+
+        /// JSON file containing the new merkle tree leaves to upload to IPFS
+        #[arg(long, value_name = "FILE")]
+        leaves_file: PathBuf,
+    },
 }
 
 const DEFAULT_IPFS_RPC_URL: &str = "http://localhost:5001";
@@ -224,6 +244,23 @@ async fn main() -> Result<()> {
             )
             .await
         }
-        Commands::Update => commands::update::run().await,
+        Commands::UpdateParams {
+            compliance_definition,
+            rpc_url,
+            private_key,
+            merkle_root,
+            leaves_file,
+        } => {
+            commands::update_params::run(
+                &compliance_definition,
+                &ipfs_url,
+                &rpc_url,
+                &private_key,
+                &merkle_root,
+                leaves_file,
+                &receipts_dir,
+            )
+            .await
+        }
     }
 }

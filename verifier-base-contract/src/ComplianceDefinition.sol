@@ -134,11 +134,9 @@ contract ComplianceDefinition {
     ///  a sanction list. The circuit and verifier remain the same, so users only need to
     ///  re-prove constraints affected by the parameter change, not the entire definition.
     /// @param newMerkleRoot Merkle root of the updated public parameter set.
-    /// @param newMetadataHash IPFS hash of the updated compliance definition metadata.
     /// @param newLeavesHash IPFS hash of the updated Merkle tree leaves.
     function updateParams(
         bytes32 newMerkleRoot,
-        string calldata newMetadataHash,
         string calldata newLeavesHash
     ) external onlyRegulator {
         ComplianceVersion memory current = getActiveVersion();
@@ -148,7 +146,7 @@ contract ComplianceDefinition {
                 merkleRoot: newMerkleRoot,
                 tStart: current.tStart,
                 tEnd: current.tEnd,
-                metadataHash: newMetadataHash,
+                metadataHash: current.metadataHash,
                 leavesHash: newLeavesHash
             })
         );
