@@ -36,4 +36,9 @@ export const CompliantTokenABI = [
     name: "ComplianceCheckFailed",
     inputs: [],
   },
+  {
+    type: "error",
+    name: "NoActiveVersion",
+    inputs: [],
+  },
 ] as const;

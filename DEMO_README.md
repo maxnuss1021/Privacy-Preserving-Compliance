@@ -60,14 +60,14 @@ Use the build-merkle tool to construct leaves files and compute merkle roots. Th
 ```sh
 # Sanction list (must be sorted for non-membership proofs)
 npx tsx packages/build-merkle/index.ts \
-  --input sanction_addresses.json \
-  --output sanction_leaves.json \
+  -f sanction_addresses.txt \
+  -o sanction_leaves.json \
   --sorted
 
 # Whitelist
 npx tsx packages/build-merkle/index.ts \
-  --input whitelist_addresses.json \
-  --output whitelist_leaves.json
+  -f whitelist_addresses.txt \
+  -o whitelist_leaves.json
 ```
 
 The tool outputs the merkle root for each tree. Use these as `--merkle-root` in the next step.
@@ -78,7 +78,7 @@ Use the regulator CLI to deploy two ComplianceDefinitions -- one for the non-mem
 
 ```sh
 # Sanction list (non-membership) -- used by SafeSwap and CleanMixer
-regulator-cli new-compliance-definition \
+cargo run --release -p regulator-cli -- new-compliance-definition \
   --circuit-dir ./circuits/non_membership \
   --name "Sanction List" \
   --rpc-url $RPC_URL \
@@ -88,7 +88,7 @@ regulator-cli new-compliance-definition \
   --leaves-file ./sanction_leaves.json
 
 # Whitelist (membership) -- used by VerifiedLend
-regulator-cli new-compliance-definition \
+cargo run --release -p regulator-cli -- new-compliance-definition \
   --circuit-dir ./circuits/membership \
   --name "Whitelist" \
   --rpc-url $RPC_URL \

@@ -77,11 +77,6 @@ function toHex(value: bigint): string {
   return "0x" + value.toString(16).padStart(64, "0");
 }
 
-function truncate(hex: string, chars = 8): string {
-  if (hex.length <= chars * 2 + 2) return hex;
-  return hex.slice(0, chars + 2) + "..." + hex.slice(-chars);
-}
-
 // -- Token helpers (demo-local, not in SDK) --------------------------------
 
 async function mintWithProof(
@@ -241,8 +236,8 @@ async function loadComplianceInfo(panel: PanelConfig) {
   const merkleRootEl = $(panel.id, "merkleRoot");
   const tokenAddrEl = $(panel.id, "tokenAddr");
 
-  cdAddrEl.textContent = truncate(panel.cdAddress);
-  tokenAddrEl.textContent = truncate(panel.tokenAddress);
+  cdAddrEl.textContent = panel.cdAddress;
+  tokenAddrEl.textContent = panel.tokenAddress;
 
   try {
     const [name, definition] = await Promise.all([
@@ -250,7 +245,7 @@ async function loadComplianceInfo(panel: PanelConfig) {
       pm.getActiveDefinition(panel.cdAddress),
     ]);
     cdNameEl.textContent = name;
-    merkleRootEl.textContent = truncate(definition.merkleRoot);
+    merkleRootEl.textContent = definition.merkleRoot;
   } catch {
     cdNameEl.textContent = "Error loading";
     merkleRootEl.textContent = "--";
@@ -326,7 +321,7 @@ function initPanel(panel: PanelConfig) {
     try {
       const txHash = await mintWithProof(panel.tokenAddress, proof);
       const balance = await getTokenBalance(panel.tokenAddress, walletAddress);
-      setMintStatus(`Minted! Balance: ${balance} | tx: ${truncate(txHash)}`);
+      setMintStatus(`Minted! Balance: ${balance} | tx: ${txHash}`);
     } catch (err) {
       setMintStatus(`Error: ${err instanceof Error ? err.message : err}`);
       console.error(err);

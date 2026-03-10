@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PPC Unified Demo</title>
+  <title>Privacy Preserving Compliance Demo</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -167,9 +167,11 @@
 <body>
   <!-- Header -->
   <div class="header">
-    <h1>Background explanation and information on demo</h1>
+    <h1>Privacy Preserving Compliance Demo</h1>
     <p>
-      Three example applications, each backed by an ERC-20 token that requires a zero-knowledge compliance proof before minting.
+      Three example applications demonstrate the privacy-preserving compliance framework.
+      Each app uses a placeholder ERC-20 token to mimic a real application's integration -- the token's <code>mint</code>
+      function requires a valid zero-knowledge compliance proof before executing.
       <strong>SafeSwap</strong> and <strong>CleanMixer</strong> share the same non-membership ComplianceDefinition (sanction list),
       so a proof generated for one is reused instantly by the other.
       <strong>VerifiedLend</strong> uses a separate membership ComplianceDefinition (whitelist).
