@@ -3,6 +3,7 @@
   "scripts": {
     "build": "pnpm -r build",
     "dev:membership": "pnpm --filter @ppc/demo-membership dev",
-    "dev:non-membership": "pnpm --filter @ppc/demo-non-membership dev"
+    "dev:non-membership": "pnpm --filter @ppc/demo-non-membership dev",
+    "dev:demo": "pnpm --filter @ppc/demo dev"
   }
 }
