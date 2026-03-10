@@ -70,7 +70,7 @@ All configurable via `.env` (Vite `VITE_` prefix):
 
 **Goal:** A minimal ERC-20 that gates minting behind a compliance proof.
 
-**Location:** `verifier-base-contract/src/CompliantToken.sol`
+**Location:** `contracts/src/CompliantToken.sol`
 
 **Contract design:**
 - Inherits from a minimal ERC-20 implementation (write inline -- no OpenZeppelin dependency since the Foundry project doesn't have it)
@@ -83,7 +83,7 @@ All configurable via `.env` (Vite `VITE_` prefix):
 - Need a small interface `IComplianceDefinition` with `function verify(bytes calldata proof) external returns (bool)`
 - Standard ERC-20 view functions: `name`, `symbol`, `decimals`, `totalSupply`, `balanceOf`, `transfer`, `approve`, `allowance`, `transferFrom`
 
-**Tests:** `verifier-base-contract/test/CompliantToken.t.sol`
+**Tests:** `contracts/test/CompliantToken.t.sol`
 - Test mint succeeds with MockVerifier (always returns true)
 - Test mint reverts with MockFailVerifier (always returns false)
 - Test minted amount is 1e18
@@ -91,8 +91,8 @@ All configurable via `.env` (Vite `VITE_` prefix):
 - Test ERC-20 transfer works after minting
 
 **Files to create:**
-- `verifier-base-contract/src/CompliantToken.sol`
-- `verifier-base-contract/test/CompliantToken.t.sol`
+- `contracts/src/CompliantToken.sol`
+- `contracts/test/CompliantToken.t.sol`
 
 **Files to modify:** None
 
@@ -268,7 +268,7 @@ const panels = [
 
 **Solidity tests:**
 ```sh
-cd verifier-base-contract && forge test
+cd contracts && forge test
 ```
 - CompliantToken.t.sol tests pass
 
@@ -296,8 +296,8 @@ pnpm dev:demo
 ### New files
 | File | Description |
 |------|-------------|
-| `verifier-base-contract/src/CompliantToken.sol` | ERC-20 with compliance-gated mint |
-| `verifier-base-contract/test/CompliantToken.t.sol` | Forge tests for CompliantToken |
+| `contracts/src/CompliantToken.sol` | ERC-20 with compliance-gated mint |
+| `contracts/test/CompliantToken.t.sol` | Forge tests for CompliantToken |
 | `packages/demo/package.json` | Unified demo package config |
 | `packages/demo/tsconfig.json` | TypeScript config |
 | `packages/demo/vite.config.ts` | Vite config with WASM headers |

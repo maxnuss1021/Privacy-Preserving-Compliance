@@ -93,7 +93,7 @@ regulator-cli new-compliance-definition \
 | `--rpc-url` | yes | Target chain RPC endpoint |
 | `--private-key` | yes | Deployer private key |
 | `--regulator` | yes | Regulator address (contract owner) |
-| `--contract-dir` | no | Foundry project path (default: `verifier-base-contract`) |
+| `--contract-dir` | no | Foundry project path (default: `contracts`) |
 | `--verifier-output` | no | Custom output path for generated `Verifier.sol` |
 | `--merkle-root` | no | Merkle root of public parameters (default: `0x00...00`) |
 | `--t-start` | no | Version activation block height (default: `0`) |
@@ -122,7 +122,7 @@ regulator-cli update-circuit \
 | `--compliance-definition` | yes | Address of the existing ComplianceDefinition contract |
 | `--rpc-url` | yes | Target chain RPC endpoint |
 | `--private-key` | yes | Regulator private key |
-| `--contract-dir` | no | Foundry project path (default: `verifier-base-contract`) |
+| `--contract-dir` | no | Foundry project path (default: `contracts`) |
 | `--verifier-output` | no | Custom output path for generated `Verifier.sol` |
 | `--merkle-root` | no | Merkle root of public parameters (default: `0x00...00`) |
 | `--t-start` | no | Version activation block height (default: `0`) |

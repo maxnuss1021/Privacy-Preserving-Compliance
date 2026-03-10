@@ -105,7 +105,7 @@ Each command outputs a receipt with the deployed ComplianceDefinition address.
 Deploy 3 token contracts using `forge create`. Each takes a ComplianceDefinition address, name, and symbol. Add `--verify` and `--etherscan-api-key` to verify the source code on Etherscan at deploy time:
 
 ```sh
-cd verifier-base-contract
+cd contracts
 
 # SafeSwap token
 forge create src/CompliantToken.sol:CompliantToken \
@@ -213,7 +213,7 @@ packages/demo/
     ├── abi.ts           # CompliantToken ABI
     └── vite-env.d.ts    # Vite type shims
 
-verifier-base-contract/src/
+contracts/src/
 ├── CompliantToken.sol   # ERC-20 with compliance-gated mint
 ├── ComplianceDefinition.sol
 └── IVerifier.sol

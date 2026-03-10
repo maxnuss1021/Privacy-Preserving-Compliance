@@ -1,8 +1,8 @@
 /target
 circuits/**/target
 receipts/
-verifier-base-contract/out/
-verifier-base-contract/cache/
+contracts/out/
+contracts/cache/
 .env
 node_modules/
 packages/*/dist/

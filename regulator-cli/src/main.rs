@@ -64,7 +64,7 @@ enum Commands {
         regulator: String,
 
         /// Path to the Foundry project containing ComplianceDefinition.sol
-        #[arg(long, default_value = "verifier-base-contract", value_name = "DIR")]
+        #[arg(long, default_value = "contracts", value_name = "DIR")]
         contract_dir: PathBuf,
 
         /// Path to write the generated Solidity verifier [default: <DIR>/target/Verifier.sol]
@@ -110,7 +110,7 @@ enum Commands {
         verifier_output: Option<PathBuf>,
 
         /// Path to the Foundry project for deploying the verifier
-        #[arg(long, default_value = "verifier-base-contract", value_name = "DIR")]
+        #[arg(long, default_value = "contracts", value_name = "DIR")]
         contract_dir: PathBuf,
 
         /// Merkle root of the compliance membership set (bytes32)
