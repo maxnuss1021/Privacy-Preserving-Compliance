@@ -37,8 +37,7 @@ struct Cli {
 
 const UINT256_MAX: &str =
     "115792089237316195423570985008687907853269984665640564039457584007913129639935";
-const BYTES32_ZERO: &str =
-    "0x0000000000000000000000000000000000000000000000000000000000000000";
+const BYTES32_ZERO: &str = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 #[derive(Subcommand)]
 enum Commands {
@@ -88,8 +87,8 @@ enum Commands {
         #[arg(long, value_name = "FILE")]
         leaves_file: Option<PathBuf>,
     },
-    /// Validate, compile, deploy a Noir circuit verifier, and register it with a ComplianceDefinition
-    Publish {
+    /// Update the circuit of an existing ComplianceDefinition: compile, deploy a new verifier, and register it
+    UpdateCircuit {
         /// Path to the Noir project directory (containing Nargo.toml)
         #[arg(value_name = "DIR")]
         path: PathBuf,
@@ -130,7 +129,7 @@ enum Commands {
         #[arg(long, value_name = "FILE")]
         leaves_file: Option<PathBuf>,
     },
-    /// Update the public parameters of an existing compliance definition
+    /// Update the public parameters of an existing ComplianceDefinition
     UpdateParams {
         /// Address of the deployed ComplianceDefinition contract
         #[arg(long)]
@@ -209,7 +208,7 @@ async fn main() -> Result<()> {
             )
             .await
         }
-        Commands::Publish {
+        Commands::UpdateCircuit {
             path,
             rpc_url,
             private_key,
@@ -221,7 +220,7 @@ async fn main() -> Result<()> {
             t_end,
             leaves_file,
         } => {
-            commands::publish::run(
+            commands::update_circuit::run(
                 path,
                 verifier_output,
                 &ipfs_url,

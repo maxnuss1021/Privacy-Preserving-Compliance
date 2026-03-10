@@ -12,7 +12,7 @@ use std::path::Path;
 sol! {
     #[sol(rpc)]
     contract ComplianceDefinition {
-        function updateConstraint(
+        function updateCircuit(
             address newVerifier,
             bytes32 newMerkleRoot,
             uint256 tStart,
@@ -166,7 +166,7 @@ fn library_placeholder(fully_qualified_name: &str) -> String {
     format!("__${}$__", &hash_hex[..34])
 }
 
-pub async fn call_update_constraint(
+pub async fn call_update_circuit(
     provider: &(impl Provider<Ethereum> + Clone),
     compliance_definition_addr: Address,
     new_verifier: Address,
@@ -179,17 +179,17 @@ pub async fn call_update_constraint(
     let contract = ComplianceDefinition::new(compliance_definition_addr, provider);
 
     let pending_tx = contract
-        .updateConstraint(new_verifier, merkle_root, t_start, t_end, metadata_uri, leaves_hash)
+        .updateCircuit(new_verifier, merkle_root, t_start, t_end, metadata_uri, leaves_hash)
         .send()
         .await
-        .context("failed to broadcast updateConstraint transaction")?;
+        .context("failed to broadcast updateCircuit transaction")?;
 
     let tx_hash = *pending_tx.tx_hash();
 
     pending_tx
         .get_receipt()
         .await
-        .context("updateConstraint transaction failed")?;
+        .context("updateCircuit transaction failed")?;
 
     Ok(tx_hash)
 }

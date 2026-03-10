@@ -16,7 +16,7 @@ import {IVerifier} from "./IVerifier.sol";
 ///  compliance against past regulations.
 contract ComplianceDefinition {
     /// @notice Captures the complete state of a compliance definition at a point in time.
-    /// @dev A new `ComplianceVersion` is appended on every call to `updateConstraint` or
+    /// @dev A new `ComplianceVersion` is appended on every call to `updateCircuit` or
     ///  `updateParams`. The version history is never modified, only extended.
     /// @param verifier Address of the ZK verifier contract containing the verification key
     ///  for the compliance circuit. Changes only on constraint updates.
@@ -68,7 +68,7 @@ contract ComplianceDefinition {
 
     /// @notice Deploys a new compliance definition owned by `_regulator`.
     /// @dev The contract is deployed with no versions. The regulator must call
-    ///  `updateConstraint` to publish the first version before the definition can be used.
+    ///  `updateCircuit` to publish the first version before the definition can be used.
     /// @param _regulator The address authorized to manage this compliance definition.
     /// @param _name Human-readable name for this compliance definition.
     constructor(address _regulator, string memory _name) {
@@ -108,7 +108,7 @@ contract ComplianceDefinition {
     /// @param tEnd Block height at which this version expires.
     /// @param metadataHash IPFS hash of the compliance circuit to be proved
     /// @param leavesHash IPFS hash of the Merkle tree leaves.
-    function updateConstraint(
+    function updateCircuit(
         address newVerifier,
         bytes32 newMerkleRoot,
         uint256 tStart,

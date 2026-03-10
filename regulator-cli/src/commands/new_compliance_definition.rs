@@ -201,7 +201,7 @@ pub async fn run(
         .with_context(|| format!("invalid t_end (expected uint256): {t_end}"))?;
 
     eprintln!("  Registering verifier on {cd_addr}...");
-    let update_tx_hash = eth::call_update_constraint(
+    let update_tx_hash = eth::call_update_circuit(
         &provider,
         cd_addr,
         verifier_result.deployed_to,

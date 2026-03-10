@@ -14,7 +14,7 @@ use crate::nargo;
 use crate::receipt::Receipt;
 
 #[derive(Debug, Serialize)]
-pub struct PublishData {
+pub struct UpdateCircuitData {
     pub project_dir: String,
     pub bytecode_path: String,
     pub vk_path: String,
@@ -150,7 +150,7 @@ pub async fn run(
 
     let verification = verification?;
 
-    // 9. Call updateConstraint on the ComplianceDefinition contract
+    // 9. Call updateCircuit on the ComplianceDefinition contract
     let cid = &response.hash;
     let cd_addr: Address = compliance_definition
         .parse()
@@ -166,7 +166,7 @@ pub async fn run(
         .with_context(|| format!("invalid t_end (expected uint256): {t_end}"))?;
 
     eprintln!("registering compliance version...");
-    let update_tx_hash = eth::call_update_constraint(
+    let update_tx_hash = eth::call_update_circuit(
         &provider,
         cd_addr,
         deploy_result.deployed_to,
@@ -187,7 +187,7 @@ pub async fn run(
     println!("chain_id={chain_id}");
     println!("verification={verification}");
 
-    let data = PublishData {
+    let data = UpdateCircuitData {
         project_dir: project_dir.display().to_string(),
         bytecode_path: bytecode_path.display().to_string(),
         vk_path: vk_path.display().to_string(),
@@ -203,7 +203,7 @@ pub async fn run(
         leaves_cid,
     };
 
-    let receipt = Receipt::new("publish", data);
+    let receipt = Receipt::new("update-circuit", data);
     receipt.write_to_dir(receipts_dir)?;
 
     Ok(())
