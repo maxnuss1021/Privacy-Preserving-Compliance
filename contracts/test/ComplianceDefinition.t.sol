@@ -223,12 +223,13 @@ contract ComplianceDefinitionTest is Test {
         vm.prank(regulator);
         cd.updateCircuit(address(capturingVerifier), expectedRoot, 0, type(uint256).max, "", "");
 
-        address caller = address(0xBEEF);
-        vm.prank(caller);
+        // vm.prank(msgSender, txOrigin) sets both msg.sender and tx.origin
+        address origin = address(0xBEEF);
+        vm.prank(address(this), origin);
         cd.verify(hex"");
 
         assertEq(capturingVerifier.getLastPublicInputsLength(), 2);
-        assertEq(capturingVerifier.getLastPublicInput(0), bytes32(uint256(uint160(caller))));
+        assertEq(capturingVerifier.getLastPublicInput(0), bytes32(uint256(uint160(origin))));
         assertEq(capturingVerifier.getLastPublicInput(1), expectedRoot);
     }
 

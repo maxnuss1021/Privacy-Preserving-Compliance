@@ -157,7 +157,6 @@ function createNonMembershipFormatter(
     }
 
     if (target < leaves[0]) {
-      setStatus("Computing below-min proof...");
       const upperProof = computeMerkleProof(leaves, 0);
       return {
         address: userAddr,
@@ -171,7 +170,6 @@ function createNonMembershipFormatter(
         proof_type: "1",
       };
     } else if (target > leaves[leaves.length - 1]) {
-      setStatus("Computing above-max proof...");
       const lastIdx = leaves.length - 1;
       const lowerProof = computeMerkleProof(leaves, lastIdx);
       const leavesWithEmpty = [...leaves, 0n];
@@ -188,7 +186,6 @@ function createNonMembershipFormatter(
         proof_type: "2",
       };
     } else {
-      setStatus("Computing sandwich proof...");
       const upperIdx = leaves.findIndex((leaf) => leaf > target);
       const lowerIdx = upperIdx - 1;
       const lowerProof = computeMerkleProof(leaves, lowerIdx);
@@ -233,22 +230,16 @@ function createMembershipFormatter(
 async function loadComplianceInfo(panel: PanelConfig) {
   const cdAddrEl = $(panel.id, "cdAddr");
   const cdNameEl = $(panel.id, "cdName");
-  const merkleRootEl = $(panel.id, "merkleRoot");
   const tokenAddrEl = $(panel.id, "tokenAddr");
 
   cdAddrEl.textContent = panel.cdAddress;
   tokenAddrEl.textContent = panel.tokenAddress;
 
   try {
-    const [name, definition] = await Promise.all([
-      pm.getName(panel.cdAddress),
-      pm.getActiveDefinition(panel.cdAddress),
-    ]);
+    const name = await pm.getName(panel.cdAddress);
     cdNameEl.textContent = name;
-    merkleRootEl.textContent = definition.merkleRoot;
   } catch {
     cdNameEl.textContent = "Error loading";
-    merkleRootEl.textContent = "--";
   }
 }
 
@@ -286,7 +277,7 @@ function initPanel(panel: PanelConfig) {
       if (cached) {
         setProofStatus("Already generated!");
       } else {
-        setProofStatus("Generating proof... (this may take 30-60 seconds)");
+        setProofStatus("Generating proof... (approx. 30-60 seconds)");
       }
 
       const formatter = panel.type === "non-membership"

@@ -170,8 +170,10 @@
     <h1>Privacy Preserving Compliance Demo</h1>
     <p>
       Three example applications demonstrate the privacy-preserving compliance framework.
-      Each app uses a placeholder ERC-20 token to mimic a real application's integration -- the token's <code>mint</code>
-      function requires a valid zero-knowledge compliance proof before executing.
+      Each app uses a placeholder ERC-20 token to mimic a real application's integration.
+      The token's <code>mint</code> function requires a valid zero-knowledge compliance proof before executing.
+    </p>
+    <p style="margin-top: 0.5rem">
       <strong>SafeSwap</strong> and <strong>CleanMixer</strong> share the same non-membership ComplianceDefinition (sanction list),
       so a proof generated for one is reused instantly by the other.
       <strong>VerifiedLend</strong> uses a separate membership ComplianceDefinition (whitelist).
@@ -200,10 +202,6 @@
         <div class="info-row">
           <span class="label">Name</span>
           <span data-ref="cdName">--</span>
-        </div>
-        <div class="info-row">
-          <span class="label">Merkle Root</span>
-          <span data-ref="merkleRoot">--</span>
         </div>
         <div class="info-row">
           <span class="label">Token</span>
@@ -235,10 +233,6 @@
           <span data-ref="cdName">--</span>
         </div>
         <div class="info-row">
-          <span class="label">Merkle Root</span>
-          <span data-ref="merkleRoot">--</span>
-        </div>
-        <div class="info-row">
           <span class="label">Token</span>
           <span data-ref="tokenAddr" style="font-family:monospace;font-size:0.72rem">--</span>
         </div>
@@ -266,10 +260,6 @@
         <div class="info-row">
           <span class="label">Name</span>
           <span data-ref="cdName">--</span>
-        </div>
-        <div class="info-row">
-          <span class="label">Merkle Root</span>
-          <span data-ref="merkleRoot">--</span>
         </div>
         <div class="info-row">
           <span class="label">Token</span>
