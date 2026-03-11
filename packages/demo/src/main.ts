@@ -156,6 +156,8 @@ function createNonMembershipFormatter(
       throw new Error("Address IS in the compliance set -- cannot prove non-membership.");
     }
 
+    setStatus("Generating proof... (approx. 30-60 seconds)");
+
     if (target < leaves[0]) {
       const upperProof = computeMerkleProof(leaves, 0);
       return {
@@ -213,8 +215,9 @@ function createMembershipFormatter(
     setStatus("Fetching merkle leaves from IPFS...");
     const leaves = await ctx.proofManager.fetchLeaves(ctx.definition.leavesHash);
 
-    setStatus("Computing merkle inclusion proof...");
     const proof = computeMerkleProofForLeaf(leaves, BigInt(userAddr));
+
+    setStatus("Generating proof... (approx. 30-60 seconds)");
 
     return {
       address: userAddr,
@@ -251,6 +254,13 @@ function initPanel(panel: PanelConfig) {
   const mintBtn = $btn(panel.id, "mintBtn");
   const mintStatus = $(panel.id, "mintStatus");
 
+  const appendProofStatus = (msg: string) => {
+    if (proofStatus.textContent) {
+      proofStatus.textContent += "\n" + msg;
+    } else {
+      proofStatus.textContent = msg;
+    }
+  };
   const setProofStatus = (msg: string) => { proofStatus.textContent = msg; };
   const setMintStatus = (msg: string) => { mintStatus.textContent = msg; };
 
@@ -266,9 +276,10 @@ function initPanel(panel: PanelConfig) {
 
     proofBtn.disabled = true;
     mintBtn.disabled = true;
-    setProofStatus("Initializing WASM...");
+    setProofStatus("");
 
     try {
+      appendProofStatus("Initializing WASM...");
       await ensureWasm();
 
       // Check if SDK cache will hit (for status message)
@@ -276,25 +287,32 @@ function initPanel(panel: PanelConfig) {
 
       if (cached) {
         setProofStatus("Already generated!");
+        const result = await pm.generateComplianceProof(panel.cdAddress,
+          panel.type === "non-membership"
+            ? createNonMembershipFormatter(walletAddress, appendProofStatus)
+            : createMembershipFormatter(walletAddress, appendProofStatus));
+        panelProofs.set(panel.id, result);
+        mintBtn.disabled = false;
       } else {
-        setProofStatus("Generating proof... (approx. 30-60 seconds)");
+        const formatter = panel.type === "non-membership"
+          ? createNonMembershipFormatter(walletAddress, appendProofStatus)
+          : createMembershipFormatter(walletAddress, appendProofStatus);
+
+        const result = await pm.generateComplianceProof(panel.cdAddress, formatter);
+
+        panelProofs.set(panel.id, result);
+        appendProofStatus("Proof generated!");
+        mintBtn.disabled = false;
       }
-
-      const formatter = panel.type === "non-membership"
-        ? createNonMembershipFormatter(walletAddress, setProofStatus)
-        : createMembershipFormatter(walletAddress, setProofStatus);
-
-      const result = await pm.generateComplianceProof(panel.cdAddress, formatter);
-
-      panelProofs.set(panel.id, result);
-      if (cached) {
-        setProofStatus("Already generated!");
-      } else {
-        setProofStatus("Proof generated!");
-      }
-      mintBtn.disabled = false;
     } catch (err) {
-      setProofStatus(`Error: ${err instanceof Error ? err.message : err}`);
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes("not found in leaves array")) {
+        appendProofStatus("Your address is not on the whitelist. Only whitelisted addresses can generate a membership proof.");
+      } else if (msg.includes("IS in the compliance set")) {
+        appendProofStatus("Your address is on the sanction list. Cannot prove non-membership.");
+      } else {
+        appendProofStatus(`Error: ${msg}`);
+      }
       console.error(err);
     } finally {
       proofBtn.disabled = false;
