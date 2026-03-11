@@ -5,8 +5,8 @@ import type { CompiledCircuit } from "@noir-lang/noir_js";
  *
  * Expects the CID to point to a directory containing a `.json` compiled
  * circuit artifact (the output of `nargo compile`).  The directory is
- * listed via the gateway's built-in JSON directory listing, and the first
- * `.json` file found is fetched and validated.
+ * fetched via the gateway's default response (typically HTML), and the
+ * first `.json` file link is extracted and fetched.
  */
 export async function fetchCircuit(
   gatewayUrl: string,
@@ -19,56 +19,48 @@ export async function fetchCircuit(
     ? metadataHash.slice(6)
     : metadataHash;
 
-  // List directory contents via the gateway's UnixFS directory listing.
-  // Try multiple response formats for broad gateway compatibility.
-  let links: { Name: string; Hash: string; Size: number }[];
+  // Fetch the directory listing from the gateway.
+  // Use a plain request (no special format parameter) so we hit the
+  // gateway's cache and get whatever format it naturally returns.
+  let jsonFileName: string;
   try {
-    // First try dag-json (Kubo gateways)
-    let lsRes = await fetch(`${baseUrl}/ipfs/${cid}/?format=dag-json`, {
-      headers: { Accept: "application/vnd.ipld.dag-json" },
-    });
+    const dirRes = await fetch(`${baseUrl}/ipfs/${cid}/`);
+    if (!dirRes.ok) {
+      throw new Error(`HTTP ${dirRes.status}`);
+    }
 
-    if (lsRes.ok) {
-      const dag = await lsRes.json();
-      links = (dag.Links ?? []).map(
-        (l: { Name: string; Hash: { "/": string }; Tsize: number }) => ({
-          Name: l.Name,
-          Hash: l.Hash["/"],
-          Size: l.Tsize,
-        }),
+    const contentType = dirRes.headers.get("content-type") || "";
+
+    if (contentType.includes("application/vnd.ipld.dag-json")) {
+      // dag-json response (some Kubo gateways)
+      const dag = await dirRes.json();
+      const link = (dag.Links ?? []).find(
+        (l: { Name: string }) => l.Name.endsWith(".json"),
       );
-    } else {
-      // Fall back to Accept: application/json (ipfs.io, Pinata, etc.)
-      lsRes = await fetch(`${baseUrl}/ipfs/${cid}/`, {
-        headers: { Accept: "application/json" },
-      });
-      if (!lsRes.ok) {
-        throw new Error(`HTTP ${lsRes.status}`);
-      }
-      const contentType = lsRes.headers.get("content-type") || "";
-      if (contentType.includes("application/json")) {
-        const json = await lsRes.json();
-        // Handle UnixFS directory JSON format (used by ipfs.io)
-        if (json.Links) {
-          links = json.Links.map(
-            (l: { Name: string; Hash: string; Size: number }) => l,
-          );
-        } else {
-          throw new Error("Unexpected JSON format from gateway");
-        }
+      if (!link) throw new Error("No .json file in dag-json directory listing");
+      jsonFileName = link.Name;
+    } else if (contentType.includes("application/json")) {
+      // JSON directory listing
+      const json = await dirRes.json();
+      if (json.Links) {
+        const link = json.Links.find(
+          (l: { Name: string }) => l.Name.endsWith(".json"),
+        );
+        if (!link) throw new Error("No .json file in JSON directory listing");
+        jsonFileName = link.Name;
       } else {
-        // Gateway returned HTML directory listing; parse file links from it
-        const html = await lsRes.text();
-        const matches = [...html.matchAll(/href="([^"]+\.json)"/g)];
-        if (matches.length === 0) {
-          throw new Error("Could not find .json files in directory listing");
-        }
-        links = matches.map((m) => ({
-          Name: m[1].replace(/^\.\//, ""),
-          Hash: "",
-          Size: 0,
-        }));
+        throw new Error("Unexpected JSON format from gateway");
       }
+    } else {
+      // HTML directory listing (most public gateways)
+      const html = await dirRes.text();
+      const matches = [...html.matchAll(/href="([^"]*\.json)"/g)];
+      if (matches.length === 0) {
+        throw new Error("No .json file found in HTML directory listing");
+      }
+      // Extract just the filename from the href (may be a full path)
+      const href = matches[0][1];
+      jsonFileName = href.split("/").pop()!;
     }
   } catch (err) {
     throw new Error(
@@ -76,31 +68,23 @@ export async function fetchCircuit(
     );
   }
 
-  const jsonFile = links.find((l) => l.Name.endsWith(".json"));
-  if (!jsonFile) {
-    throw new Error(
-      `No .json circuit artifact found in IPFS directory ${cid}. ` +
-        `Contents: ${links.map((l) => l.Name).join(", ") || "(empty)"}`,
-    );
-  }
-
   // Fetch the compiled circuit JSON via the gateway
   let circuit: CompiledCircuit;
   try {
-    const catRes = await fetch(`${baseUrl}/ipfs/${cid}/${jsonFile.Name}`);
+    const catRes = await fetch(`${baseUrl}/ipfs/${cid}/${jsonFileName}`);
     if (!catRes.ok) {
       throw new Error(`HTTP ${catRes.status}`);
     }
     circuit = await catRes.json();
   } catch (err) {
     throw new Error(
-      `Failed to fetch ${jsonFile.Name} from IPFS (${cid}): ${err instanceof Error ? err.message : err}`,
+      `Failed to fetch ${jsonFileName} from IPFS (${cid}): ${err instanceof Error ? err.message : err}`,
     );
   }
 
   if (!circuit.bytecode || !circuit.abi) {
     throw new Error(
-      `${jsonFile.Name} in CID ${cid} is not a compiled circuit artifact (missing bytecode or abi). ` +
+      `${jsonFileName} in CID ${cid} is not a compiled circuit artifact (missing bytecode or abi). ` +
         `Ensure the regulator uploaded the compiled JSON from nargo compile, not the .nr source.`,
     );
   }
