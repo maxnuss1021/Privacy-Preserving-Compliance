@@ -320,8 +320,10 @@ function initPanel(panel: PanelConfig) {
         appendProofStatus("Your address is not on the whitelist. Only whitelisted addresses can generate a membership proof.");
       } else if (msg.includes("IS in the compliance set")) {
         appendProofStatus("Your address is on the sanction list. Cannot prove non-membership.");
+      } else if (msg.includes("Failed to list IPFS") || msg.includes("Failed to fetch")) {
+        appendProofStatus("Error: Could not fetch data from IPFS. Check console for details.");
       } else {
-        appendProofStatus(`Error: ${msg}`);
+        appendProofStatus("Error: Something went wrong. Check console for details.");
       }
       console.error(err);
     } finally {

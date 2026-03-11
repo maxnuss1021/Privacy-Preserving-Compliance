@@ -43,7 +43,7 @@ export async function fetchCircuit(
         headers: { Accept: "application/json" },
       });
       if (!lsRes.ok) {
-        throw new Error(`HTTP ${lsRes.status}: ${await lsRes.text()}`);
+        throw new Error(`HTTP ${lsRes.status}`);
       }
       const contentType = lsRes.headers.get("content-type") || "";
       if (contentType.includes("application/json")) {
@@ -89,7 +89,7 @@ export async function fetchCircuit(
   try {
     const catRes = await fetch(`${baseUrl}/ipfs/${cid}/${jsonFile.Name}`);
     if (!catRes.ok) {
-      throw new Error(`HTTP ${catRes.status}: ${await catRes.text()}`);
+      throw new Error(`HTTP ${catRes.status}`);
     }
     circuit = await catRes.json();
   } catch (err) {
