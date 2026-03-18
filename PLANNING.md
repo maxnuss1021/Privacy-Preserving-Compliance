@@ -68,7 +68,6 @@ Enable users to generate compliance proofs efficiently
 
 **Key Functionality**:
 - Fetch compliance definition from IPFS or direct input
-- Verify regulator signatures
 - Index user transaction history
 - Fetch public proof inputs from verifier contract
 - Generate individual constraint proofs
@@ -98,9 +97,8 @@ function transfer(address recipient, uint256 amount, bytes proof) {
 ### Milestone 1: Regulator Stack
 
 #### Core CLI Development (regulator-cli/)
-- [ ] `new-compliance-definition` command
+- [x] `new-compliance-definition` command
   - [x] Take Noir circuit input
-  - [ ] Sign circuit with regulator private key
   - [x] Upload to IPFS 
   - [x] Deploy verifier contract
 - [x] `update-circuit` command
@@ -110,9 +108,7 @@ function transfer(address recipient, uint256 amount, bytes proof) {
 - [x] Add version tracking
 - [x] Implement parameter update functions
 - [x] Add metadata storage (IPFS hash)
-- [ ] Access control
-  - [x] Ownable pattern for updates
-  - [ ] Regulator signature verification 
+- [x] Ownable pattern for updates
 
 #### Example Compliance Circuits (circuits/)
 - [x] Sanctions list check (NON-MEM)
@@ -124,7 +120,6 @@ function transfer(address recipient, uint256 amount, bytes proof) {
 #### Circuit handling
 - [x] Input verifier contract address
 - [x] Fetch Noir code and compiled circuit of compliance definition from IPFS
-- [ ] Verify regulator signature 
 - [ ] Maybe: compile .nr code and verify it matches the compiled circuit on IPFS
 
 #### Indexing System
@@ -177,6 +172,10 @@ Still required, but we should focus on the MVP first
   - [ ] Require proof on deposit
   - [ ] Verify proof on withdrawal
 - [ ] Deploy demo frontend
+
+#### Prettier demo
+- [ ] Make demo nicer for public sharing
+- [ ] Maybe: visualization of deployed compliance definitions and applications that use them.  Would look like a DAG.  And have this either dynamically updatable or render with the demo.
 
 ---
 ## Extensions and future work
