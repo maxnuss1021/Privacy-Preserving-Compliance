@@ -46,6 +46,10 @@ Each benchmark run captures three timings:
 
 **Barretenberg init time** is recorded separately. This is the one-time cost of booting the WASM runtime, measured outside the benchmark loop.
 
+### WASM backend
+
+The benchmark forces Barretenberg's **WASM backend** (`BackendType.Wasm`) rather than the native binary backend that `@aztec/bb.js` defaults to in Node.js. This is intentional — the end application runs in the browser where Barretenberg executes as WASM, so using the native backend would produce misleadingly fast results. The WASM backend in Node.js provides a closer approximation of browser proving performance since both environments execute the same WASM bytecode.
+
 ## Output
 
 Results are written to `benchmark-data/` at the project root (gitignored). Each run produces a timestamped JSON file:
@@ -172,10 +176,11 @@ pnpm bench -- --circuit membership --runs 5 --leaves 10,100,1000
 
 ### Browser-based benchmarking
 
-The benchmark runs in Node.js. Since the end application is browser-based, a browser harness would capture real-world performance more accurately. Node.js and Chrome share V8, so proving times should be similar for Chrome users. However, differences may arise from:
+The current benchmark runs in Node.js with Barretenberg's WASM backend, which approximates browser performance since both environments execute the same WASM bytecode on V8 (Chrome/Node). However, a true browser benchmark harness would capture additional real-world factors:
 
-- **Threading model** — Node.js `worker_threads` vs browser Web Workers + SharedArrayBuffer
-- **Memory constraints** — browsers have tighter WASM memory limits and compete with the DOM
+- **Threading model** — Node.js `worker_threads` vs browser Web Workers + SharedArrayBuffer have different coordination overhead
+- **Memory constraints** — browsers have tighter WASM memory limits and compete with the DOM for resources
 - **Cross-browser variance** — Firefox (SpiderMonkey) and Safari (JavaScriptCore) have different WASM engines and may show meaningfully different proving times
+- **WASM bootstrap** — the browser requires explicit `initACVM()` / `initNoirC()` calls to initialize Noir's WASM modules, which the Node.js benchmark skips since those auto-initialize in Node
 
-A browser harness could use a minimal Vite page (similar to the existing demos) that runs the proving loop and posts results back. This would also capture the WASM bootstrap cost (`initACVM()` / `initNoirC()`), which the Node.js benchmark skips since those modules auto-initialize in Node.
+A browser harness could use a minimal Vite page (similar to the existing demos) that runs the proving loop and posts results back. This would give the most accurate picture of end-user proving latency.

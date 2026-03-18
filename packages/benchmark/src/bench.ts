@@ -1,5 +1,5 @@
 import { Noir, type CompiledCircuit } from "@noir-lang/noir_js";
-import { Barretenberg, UltraHonkBackend } from "@aztec/bb.js";
+import { Barretenberg, UltraHonkBackend, BackendType } from "@aztec/bb.js";
 import type { InputMap } from "@noir-lang/noirc_abi";
 import { performance } from "perf_hooks";
 
@@ -21,8 +21,9 @@ export async function runBenchmark(
   runs: number,
 ): Promise<BenchOutput> {
   // Initialize Barretenberg once — measure this separately
+  // Force WASM backend to match browser proving performance
   const initStart = performance.now();
-  const api = await Barretenberg.new();
+  const api = await Barretenberg.new({ backend: BackendType.Wasm });
   const barretenbergInitMs = performance.now() - initStart;
 
   try {
