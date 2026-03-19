@@ -156,7 +156,7 @@ function createNonMembershipFormatter(
       throw new Error("Address IS in the compliance set -- cannot prove non-membership.");
     }
 
-    setStatus("Generating proof... (approx. 30-60 seconds)");
+    setStatus("Generating proof...");
 
     if (target < leaves[0]) {
       const upperProof = computeMerkleProof(leaves, 0);
@@ -217,7 +217,7 @@ function createMembershipFormatter(
 
     const proof = computeMerkleProofForLeaf(leaves, BigInt(userAddr));
 
-    setStatus("Generating proof... (approx. 30-60 seconds)");
+    setStatus("Generating proof...");
 
     return {
       address: userAddr,
@@ -305,13 +305,23 @@ function initPanel(panel: PanelConfig) {
           ? createNonMembershipFormatter(walletAddress, appendProofStatus)
           : createMembershipFormatter(walletAddress, appendProofStatus);
 
+        const witnessStart = performance.now();
         const inputs = await formatter({ definition, circuit, proofManager: pm });
+        const witnessEnd = performance.now();
 
+        const proveStart = performance.now();
         const result = await pm.prove(circuit, inputs);
+        const proveEnd = performance.now();
+
+        const witnessDuration = ((witnessEnd - witnessStart) / 1000).toFixed(2);
+        const proveDuration = ((proveEnd - proveStart) / 1000).toFixed(2);
+        const totalDuration = (((proveEnd - witnessStart)) / 1000).toFixed(2);
+
+        console.log(`[${panel.name}] Witness generation: ${witnessDuration}s | Proof generation: ${proveDuration}s | Total: ${totalDuration}s`);
 
         pm.setCachedProof(panel.cdAddress, versionCount, result);
         panelProofs.set(panel.id, result);
-        appendProofStatus("Proof generated!");
+        appendProofStatus(`Proof generated! (witness: ${witnessDuration}s, proof: ${proveDuration}s, total: ${totalDuration}s)`);
         mintBtn.disabled = false;
       }
     } catch (err) {

@@ -80,6 +80,7 @@ Use the regulator CLI to deploy two ComplianceDefinitions -- one for the non-mem
 
 ```sh
 # Sanction list (non-membership) -- used by SafeSwap and CleanMixer
+# Set the output contract address ("compliance_definition=0x...") as SANCTION_CD_ADDRESS for following commands
 cargo run --release -p regulator-cli -- new-compliance-definition \
   --circuit-dir ./circuits/non_membership \
   --name "Sanction List" \
@@ -90,6 +91,7 @@ cargo run --release -p regulator-cli -- new-compliance-definition \
   --leaves-file ./sanction_leaves.json
 
 # Whitelist (membership) -- used by VerifiedLend
+# Set the output contract address ("compliance_definition=0x...") as WHITELIST_CD_ADDRESS for following commands
 cargo run --release -p regulator-cli -- new-compliance-definition \
   --circuit-dir ./circuits/membership \
   --name "Whitelist" \
