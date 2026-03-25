@@ -6,6 +6,6 @@
     "dev:non-membership": "pnpm --filter @ppc/demo-non-membership dev",
     "dev:demo": "pnpm --filter @ppc/demo dev",
     "bench": "pnpm --filter @ppc/benchmark-native bench",
-    "dev:bench": "pnpm --filter @ppc/benchmark-native-browser dev"
+    "dev:bench": "pnpm --filter @ppc/benchmark-browser dev"
   }
 }
