@@ -309,3 +309,11 @@ Cross-Origin-Embedder-Policy: require-corp
 ```
 
 If you deploy the demos, your hosting must also send these headers.
+
+## Future Work
+
+### Persistent Barretenberg instance
+
+Currently, `prove.ts` creates a new `Barretenberg` API instance (`Barretenberg.new()`) and destroys it on every proof generation call. In the browser, Barretenberg initialization (loading and compiling the WASM module) takes several seconds. This means users pay the full init cost on every proof, even if they generate multiple proofs in the same session.
+
+The `ProofManager` could instead hold a `Barretenberg` instance as a class field, initialized lazily on the first `prove()` call and reused for all subsequent calls. Since applications already create a single `ProofManager` per page, this would make the WASM init a one-time cost per browser session with no changes to application code.
