@@ -145,16 +145,8 @@ function transfer(address recipient, uint256 amount, bytes proof) {
 ### Milestone 4: Benchmarking
 
 ### Performance Metrics
-- [ ] Proof generation time per constraint type
-- [ ] Proof size measurements
+- [x] Proof generation time per constraint type
 - [ ] Transaction history size scaling
-
-### Test Scenarios
-- [ ] Empty set membership (baseline)
-- [ ] Large sanction lists (10k+ addresses)
-- [ ] Long transaction histories (1000+ txns)
-- [ ] Complex multi-constraint definitions
-- [ ] Update frequency stress tests
 
 ---
 ## Post-MVP
