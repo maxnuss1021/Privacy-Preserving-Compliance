@@ -9,6 +9,14 @@ This repository contains the implementation of a framework for composable privac
 
 This framework is distinguished by its composability and generality, designed explicitly for a global ecosystem with many regulatory bodies whose requirements evolve over time.  Compliance definitions are chain-agnostic, modular with respect to privacy mechanisms, versioned to accommodate regulatory updates, and can be combined arbitrarily which allows applications to satisfy multiple jurisdictions simultaneously.
 
+### General framework diagram
+This is the general interaction between actors in this framework, not specific to this implementation.
+![High level framework diagram](thesis-impl-broad.png)
+
+### Framework implementation diagram
+The specific implementation of the framework that this repository holds.
+![Repo specific framework implementation diagram](thesis-impl.png)
+
 ### Key Features
 
 - **No Deanonymization**: Users prove compliance without revealing transaction histories or balances
