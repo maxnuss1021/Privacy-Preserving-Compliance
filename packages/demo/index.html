@@ -193,6 +193,20 @@
     .flow-box-title a:hover {
       text-decoration: underline;
     }
+    .flow-box .pdf-preview {
+      margin-top: 0.75rem;
+      border: 1px solid #333;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .flow-box .pdf-preview canvas {
+      display: block;
+      width: 120%;
+      height: auto;
+      margin-left: -10%;
+      margin-top: -60%;
+    }
     .flow-box-sub {
       font-size: 0.82rem;
       color: #888;
@@ -299,6 +313,9 @@
       <div class="flow-box-title">
         <a href="https://www.fincen.gov/resources/statutes-and-regulations/bank-secrecy-act" target="_blank" rel="noopener">BSA/AML Legislation</a>
       </div>
+      <div class="pdf-preview">
+        <canvas id="pdfCanvas"></canvas>
+      </div>
     </div>
 
     <!-- Arrow 1 -->
@@ -312,12 +329,9 @@
     <!-- Box 2: Compliance requirement -->
     <div class="flow-box code-file">
       <div class="file-header">BSA_AML.compliance</div>
-<pre><code><span class="noir-kw">require</span> sender <span class="noir-kw">not in</span> sanction_list {
-    <span class="noir-num">0xb12...</span>,
-    <span class="noir-num">0x5f2...</span>,
-    <span class="noir-num">0x107...</span>,
-    ...
-}</code></pre>
+<pre><code>sanction_list <span class="noir-op">=</span> {<span class="noir-num">0xb12...</span>, <span class="noir-num">0x5f2...</span>, <span class="noir-num">0x107...</span>, ...}
+
+<span class="noir-kw">require</span> sender <span class="noir-kw">not in</span> sanction_list</code></pre>
     </div>
 
     <!-- Arrow 2 -->
@@ -338,7 +352,7 @@
     <!-- Arrow 3 -->
     <div class="flow-arrow">
       <div class="flow-arrow-line"></div>
-      <div class="flow-arrow-label">Compile to ZKDL (ie. Noir)</div>
+      <div class="flow-arrow-label">Compile to ZK DSL (ie. Noir)</div>
       <div class="flow-arrow-line"></div>
       <div class="flow-arrow-head"></div>
     </div>
@@ -499,6 +513,20 @@
   </div>
 
   <script src="coi-serviceworker.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs" type="module"></script>
+  <script type="module">
+    import { GlobalWorkerOptions, getDocument } from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs";
+    GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs";
+
+    const pdf = await getDocument("bank-secrecy-1970.pdf").promise;
+    const page = await pdf.getPage(1);
+    const scale = 2;
+    const viewport = page.getViewport({ scale });
+    const canvas = document.getElementById("pdfCanvas");
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+  </script>
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
