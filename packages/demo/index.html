@@ -163,9 +163,213 @@
       min-height: 1.2rem;
       word-break: break-all;
     }
+
+    /* -- Flowchart -- */
+    .flowchart {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 640px;
+      margin: 0 auto 2rem;
+    }
+    .flow-box {
+      width: 100%;
+      background: #141414;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      text-align: center;
+    }
+    .flow-box-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #e0e0e0;
+      margin-bottom: 0.3rem;
+    }
+    .flow-box-title a {
+      color: #60a5fa;
+      text-decoration: none;
+    }
+    .flow-box-title a:hover {
+      text-decoration: underline;
+    }
+    .flow-box-sub {
+      font-size: 0.82rem;
+      color: #888;
+      line-height: 1.5;
+    }
+    .flow-box-sub .addr-list {
+      font-family: monospace;
+      font-size: 0.78rem;
+      color: #aaa;
+    }
+    .flow-box .math {
+      font-family: "Times New Roman", "Latin Modern Math", Georgia, serif;
+      font-size: 1.35rem;
+      color: #e0e0e0;
+      letter-spacing: 0.02em;
+    }
+    .flow-box .math .fn {
+      font-style: italic;
+    }
+    .flow-box .math sub {
+      font-size: 0.7em;
+      color: #bbb;
+    }
+    .flow-box pre {
+      text-align: left;
+      background: #0d0d0d;
+      border: 1px solid #252525;
+      border-radius: 6px;
+      padding: 1rem;
+      overflow-x: auto;
+      font-size: 0.75rem;
+      line-height: 1.55;
+      color: #c8c8c8;
+      margin: 0;
+    }
+    /* Noir syntax highlighting */
+    .noir-kw { color: #c678dd; }
+    .noir-type { color: #e5c07b; }
+    .noir-fn { color: #61afef; }
+    .noir-str { color: #98c379; }
+    .noir-num { color: #d19a66; }
+    .noir-op { color: #56b6c2; }
+    .flow-arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.3rem 0;
+    }
+    .flow-arrow-line {
+      width: 2px;
+      height: 28px;
+      background: #555;
+    }
+    .flow-arrow-label {
+      font-size: 0.78rem;
+      color: #999;
+      font-style: italic;
+      padding: 0.25rem 0;
+      text-align: center;
+    }
+    .flow-arrow-head {
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid #555;
+    }
+
+    /* -- Section divider -- */
+    .section-divider {
+      max-width: 640px;
+      margin: 1.5rem auto 1.5rem;
+      border: none;
+      border-top: 1px solid #333;
+    }
+    .section-heading {
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: #999;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
   </style>
 </head>
 <body>
+  <!-- High-level flow -->
+  <div class="flowchart">
+
+    <!-- Box 1: Legislation -->
+    <div class="flow-box">
+      <div class="flow-box-title">
+        <a href="https://www.fincen.gov/resources/statutes-and-regulations/bank-secrecy-act" target="_blank" rel="noopener">BSA/AML Legislation</a>
+      </div>
+    </div>
+
+    <!-- Arrow 1 -->
+    <div class="flow-arrow">
+      <div class="flow-arrow-line"></div>
+      <div class="flow-arrow-label">Express relevant regulations in Compliance DSL</div>
+      <div class="flow-arrow-line"></div>
+      <div class="flow-arrow-head"></div>
+    </div>
+
+    <!-- Box 2: Compliance requirement -->
+    <div class="flow-box">
+      <div class="flow-box-title">User is not in sanction list</div>
+      <div class="flow-box-sub">
+        <span class="addr-list">{0xb12..., 0x5f2..., 0x107..., ...}</span>
+      </div>
+    </div>
+
+    <!-- Arrow 2 -->
+    <div class="flow-arrow">
+      <div class="flow-arrow-line"></div>
+      <div class="flow-arrow-label">Compile to logical representation</div>
+      <div class="flow-arrow-line"></div>
+      <div class="flow-arrow-head"></div>
+    </div>
+
+    <!-- Box 3: Logical representation -->
+    <div class="flow-box">
+      <div class="math">
+        <span class="fn">sender</span>(<span class="fn">txn</span>) &notin; <span class="fn">P</span><sub>sanctioned</sub>
+      </div>
+    </div>
+
+    <!-- Arrow 3 -->
+    <div class="flow-arrow">
+      <div class="flow-arrow-line"></div>
+      <div class="flow-arrow-label">Compile to ZKDL (ie. Noir)</div>
+      <div class="flow-arrow-line"></div>
+      <div class="flow-arrow-head"></div>
+    </div>
+
+    <!-- Box 4: Noir code preview -->
+    <div class="flow-box">
+<pre><code><span class="noir-kw">fn</span> <span class="noir-fn">main</span>(
+    address: <span class="noir-kw">pub</span> <span class="noir-type">Field</span>,
+    root: <span class="noir-kw">pub</span> <span class="noir-type">Field</span>,
+    lower_leaf: <span class="noir-type">Field</span>,
+    upper_leaf: <span class="noir-type">Field</span>,
+    lower_index: <span class="noir-type">Field</span>,
+    upper_index: <span class="noir-type">Field</span>,
+    lower_hash_path: [<span class="noir-type">Field</span>; <span class="noir-num">32</span>],
+    upper_hash_path: [<span class="noir-type">Field</span>; <span class="noir-num">32</span>],
+    proof_type: <span class="noir-type">u8</span>,
+) {
+    <span class="noir-kw">if</span> proof_type <span class="noir-op">==</span> <span class="noir-num">0</span> {
+        <span class="noir-fn">assert</span>(lower_leaf.<span class="noir-fn">lt</span>(address), <span class="noir-str">"lower_leaf must be less than address"</span>);
+        <span class="noir-fn">assert</span>(address.<span class="noir-fn">lt</span>(upper_leaf), <span class="noir-str">"address must be less than upper_leaf"</span>);
+        <span class="noir-fn">assert</span>(upper_index <span class="noir-op">==</span> lower_index <span class="noir-op">+</span> <span class="noir-num">1</span>, <span class="noir-str">"leaves must be adjacent"</span>);
+
+        <span class="noir-kw">let</span> lower_root <span class="noir-op">=</span> <span class="noir-fn">compute_merkle_root</span>(lower_leaf, lower_index, lower_hash_path);
+        <span class="noir-fn">assert</span>(lower_root <span class="noir-op">==</span> root, <span class="noir-str">"lower_leaf merkle proof invalid"</span>);
+
+        <span class="noir-kw">let</span> upper_root <span class="noir-op">=</span> <span class="noir-fn">compute_merkle_root</span>(upper_leaf, upper_index, upper_hash_path);
+        <span class="noir-fn">assert</span>(upper_root <span class="noir-op">==</span> root, <span class="noir-str">"upper_leaf merkle proof invalid"</span>);
+    } <span class="noir-kw">else</span> <span class="noir-kw">if</span> proof_type <span class="noir-op">==</span> <span class="noir-num">1</span> {
+        <span class="noir-fn">assert</span>(address.<span class="noir-fn">lt</span>(upper_leaf), <span class="noir-str">"address must be less than first leaf"</span>);
+        <span class="noir-fn">assert</span>(upper_index <span class="noir-op">==</span> <span class="noir-num">0</span>, <span class="noir-str">"first leaf must be at index 0"</span>);
+
+        <span class="noir-kw">let</span> upper_root <span class="noir-op">=</span> <span class="noir-fn">compute_merkle_root</span>(upper_leaf, upper_index, upper_hash_path);
+        <span class="noir-fn">assert</span>(upper_root <span class="noir-op">==</span> root, <span class="noir-str">"first leaf merkle proof invalid"</span>);
+    } <span class="noir-kw">else</span> {
+        <span class="noir-fn">assert</span>(lower_leaf.<span class="noir-fn">lt</span>(address), <span class="noir-str">"last leaf must be less than address"</span>);
+
+        <span class="noir-kw">let</span> lower_root <span class="noir-op">=</span> <span class="noir-fn">compute_merkle_root</span>(lower_leaf, lower_index, lower_hash_path);
+        <span class="noir-fn">assert</span>(lower_root <span class="noir-op">==</span> root, <span class="noir-str">"last leaf merkle proof invalid"</span>);
+
+        <span class="noir-kw">let</span> empty_root <span class="noir-op">=</span> <span class="noir-fn">compute_merkle_root</span>(<span class="noir-num">0</span>, lower_index <span class="noir-op">+</span> <span class="noir-num">1</span>, upper_hash_path);
+        <span class="noir-fn">assert</span>(empty_root <span class="noir-op">==</span> root, <span class="noir-str">"next position must be empty"</span>);
+    }
+}</code></pre>
+    </div>
+
+  </div>
+
   <!-- Header -->
   <div class="header">
     <h1>Privacy Preserving Compliance Demo <span style="font-size:0.75rem;color:#666">(Sepolia Testnet)</span></h1>

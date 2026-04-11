@@ -159,6 +159,11 @@ Still required, but we should focus on the MVP first
 - [ ] structuring constraint
 - [ ] Valid ZK passport constraint
 
+#### Non-membership proof Noir optimization 
+- [ ] Explore using an indexed Merkle tree instead of the ordered Merkle tree for non-membership proofs.
+- [ ] Benchmark the proof generation speedup/slowdown
+- [ ] Benchmark the client-side tree generation speedup/slowdown (for when the regulator has to add an address or multiple to the sanction list)
+
 #### Proof aggregation (constraints)
 - [ ] Modify verifier contract to aggregate and verify multiple proofs
 - [ ] Example compliance definition that requires multiple constraints
