@@ -216,11 +216,24 @@
       font-size: 0.7em;
       color: #bbb;
     }
+    .flow-box.code-file {
+      padding: 0;
+      overflow: hidden;
+    }
+    .file-header {
+      background: #1e1e1e;
+      border-bottom: 1px solid #333;
+      padding: 0.4rem 0.85rem;
+      font-size: 0.72rem;
+      font-family: monospace;
+      color: #888;
+      text-align: left;
+    }
     .flow-box pre {
       text-align: left;
       background: #0d0d0d;
-      border: 1px solid #252525;
-      border-radius: 6px;
+      border: none;
+      border-radius: 0;
       padding: 1rem;
       overflow-x: auto;
       font-size: 0.75rem;
@@ -297,11 +310,14 @@
     </div>
 
     <!-- Box 2: Compliance requirement -->
-    <div class="flow-box">
-      <div class="flow-box-title">User is not in sanction list</div>
-      <div class="flow-box-sub">
-        <span class="addr-list">{0xb12..., 0x5f2..., 0x107..., ...}</span>
-      </div>
+    <div class="flow-box code-file">
+      <div class="file-header">BSA_AML.compliance</div>
+<pre><code><span class="noir-kw">require</span> sender <span class="noir-kw">not in</span> sanction_list {
+    <span class="noir-num">0xb12...</span>,
+    <span class="noir-num">0x5f2...</span>,
+    <span class="noir-num">0x107...</span>,
+    ...
+}</code></pre>
     </div>
 
     <!-- Arrow 2 -->
@@ -328,7 +344,8 @@
     </div>
 
     <!-- Box 4: Noir code preview -->
-    <div class="flow-box">
+    <div class="flow-box code-file">
+      <div class="file-header">sanction.nr</div>
 <pre><code><span class="noir-kw">fn</span> <span class="noir-fn">main</span>(
     address: <span class="noir-kw">pub</span> <span class="noir-type">Field</span>,
     root: <span class="noir-kw">pub</span> <span class="noir-type">Field</span>,
