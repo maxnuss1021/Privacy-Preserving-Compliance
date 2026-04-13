@@ -218,5 +218,10 @@ Still required, but we should focus on the MVP first
 - **Credential Systems**: Prove eligibility without revealing attributes
 - **Supply Chain**: B2B privacy on public chains
 
+#### Compliance Definition Index
+- [ ] Add required events to ComplianceDefinition contract
+- [ ] Indexer that scans entire chains for all events related to ComplianceDefinition contracts (ex: new compliance definition published, update, proof submitted, etc)
+- [ ] Frontend to display all active compliance definitions and other information.  This frontend could also fetch relevant information for each compliance definition like the circuit its using or public inputs from IPFS
+
 
 
