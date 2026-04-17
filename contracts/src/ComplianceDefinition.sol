@@ -32,6 +32,7 @@ contract ComplianceDefinition {
     struct ComplianceVersion {
         address verifier;
         bytes32 merkleRoot;
+        bytes32 merkleRoot2;
         uint256 tStart;
         uint256 tEnd;
         string metadataHash;
@@ -92,9 +93,10 @@ contract ComplianceDefinition {
     /// @return True if the proof is valid, indicating the transaction signer is compliant.
     function verify(bytes calldata proof) external returns (bool) {
         ComplianceVersion memory v = getActiveVersion();
-        bytes32[] memory publicInputs = new bytes32[](2);
+        bytes32[] memory publicInputs = new bytes32[](3);
         publicInputs[0] = bytes32(uint256(uint160(tx.origin)));
         publicInputs[1] = v.merkleRoot;
+        publicInputs[2] = v.merkleRoot2;
         return IVerifier(v.verifier).verify(proof, publicInputs);
     }
 
@@ -113,6 +115,7 @@ contract ComplianceDefinition {
     function updateCircuit(
         address newVerifier,
         bytes32 newMerkleRoot,
+        bytes32 newMerkleRoot2,
         uint256 tStart,
         uint256 tEnd,
         string calldata metadataHash,
@@ -122,6 +125,7 @@ contract ComplianceDefinition {
             ComplianceVersion({
                 verifier: newVerifier,
                 merkleRoot: newMerkleRoot,
+                merkleRoot2: newMerkleRoot2,
                 tStart: tStart,
                 tEnd: tEnd,
                 metadataHash: metadataHash,
@@ -139,6 +143,7 @@ contract ComplianceDefinition {
     /// @param newLeavesHash IPFS hash of the updated Merkle tree leaves.
     function updateParams(
         bytes32 newMerkleRoot,
+        bytes32 newMerkleRoot2,
         string calldata newLeavesHash
     ) external onlyRegulator {
         ComplianceVersion memory current = getActiveVersion();
@@ -146,6 +151,7 @@ contract ComplianceDefinition {
             ComplianceVersion({
                 verifier: current.verifier,
                 merkleRoot: newMerkleRoot,
+                merkleRoot2: newMerkleRoot2,
                 tStart: current.tStart,
                 tEnd: current.tEnd,
                 metadataHash: current.metadataHash,
