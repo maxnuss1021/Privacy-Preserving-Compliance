@@ -71,9 +71,13 @@ enum Commands {
         #[arg(long, value_name = "FILE")]
         verifier_output: Option<PathBuf>,
 
-        /// Merkle root of the compliance membership set (bytes32)
+        /// Merkle root of the first compliance membership set (bytes32)
         #[arg(long, default_value = BYTES32_ZERO)]
-        merkle_root: String,
+        merkle_root_1: String,
+
+        /// Merkle root of the second compliance membership set (bytes32)
+        #[arg(long, default_value = BYTES32_ZERO)]
+        merkle_root_2: String,
 
         /// Block height when this version becomes active
         #[arg(long, default_value = "0")]
@@ -83,9 +87,13 @@ enum Commands {
         #[arg(long, default_value = UINT256_MAX)]
         t_end: String,
 
-        /// JSON file containing merkle tree leaves to upload to IPFS
+        /// JSON file containing first merkle tree leaves to upload to IPFS
         #[arg(long, value_name = "FILE")]
-        leaves_file: Option<PathBuf>,
+        leaves_file_1: Option<PathBuf>,
+
+        /// JSON file containing second merkle tree leaves to upload to IPFS
+        #[arg(long, value_name = "FILE")]
+        leaves_file_2: Option<PathBuf>,
     },
     /// Update the circuit of an existing ComplianceDefinition: compile, deploy a new verifier, and register it
     UpdateCircuit {
@@ -113,9 +121,13 @@ enum Commands {
         #[arg(long, default_value = "contracts", value_name = "DIR")]
         contract_dir: PathBuf,
 
-        /// Merkle root of the compliance membership set (bytes32)
+        /// Merkle root of the first compliance membership set (bytes32)
         #[arg(long, default_value = BYTES32_ZERO)]
-        merkle_root: String,
+        merkle_root_1: String,
+
+        /// Merkle root of the second compliance membership set (bytes32)
+        #[arg(long, default_value = BYTES32_ZERO)]
+        merkle_root_2: String,
 
         /// Block height when this version becomes active
         #[arg(long, default_value = "0")]
@@ -125,9 +137,13 @@ enum Commands {
         #[arg(long, default_value = UINT256_MAX)]
         t_end: String,
 
-        /// JSON file containing merkle tree leaves to upload to IPFS
+        /// JSON file containing first merkle tree leaves to upload to IPFS
         #[arg(long, value_name = "FILE")]
-        leaves_file: Option<PathBuf>,
+        leaves_file_1: Option<PathBuf>,
+
+        /// JSON file containing second merkle tree leaves to upload to IPFS
+        #[arg(long, value_name = "FILE")]
+        leaves_file_2: Option<PathBuf>,
     },
     /// Update the public parameters of an existing ComplianceDefinition
     UpdateParams {
@@ -143,13 +159,21 @@ enum Commands {
         #[arg(long, env = "PRIVATE_KEY")]
         private_key: String,
 
-        /// New Merkle root of the public parameter set (bytes32)
+        /// New Merkle root of the first public parameter set (bytes32)
         #[arg(long)]
-        merkle_root: String,
+        merkle_root_1: String,
 
-        /// JSON file containing the new merkle tree leaves to upload to IPFS
+        /// New Merkle root of the second public parameter set (bytes32)
+        #[arg(long)]
+        merkle_root_2: String,
+
+        /// JSON file containing the new first merkle tree leaves to upload to IPFS
         #[arg(long, value_name = "FILE")]
-        leaves_file: PathBuf,
+        leaves_file_1: PathBuf,
+
+        /// JSON file containing the new second merkle tree leaves to upload to IPFS
+        #[arg(long, value_name = "FILE")]
+        leaves_file_2: PathBuf,
     },
 }
 
@@ -185,10 +209,12 @@ async fn main() -> Result<()> {
             regulator,
             contract_dir,
             verifier_output,
-            merkle_root,
+            merkle_root_1,
+            merkle_root_2,
             t_start,
             t_end,
-            leaves_file,
+            leaves_file_1,
+            leaves_file_2,
         } => {
             commands::new_compliance_definition::run(
                 circuit_dir,
@@ -199,10 +225,12 @@ async fn main() -> Result<()> {
                 &private_key,
                 &regulator,
                 &contract_dir,
-                &merkle_root,
+                &merkle_root_1,
+                &merkle_root_2,
                 &t_start,
                 &t_end,
-                leaves_file,
+                leaves_file_1,
+                leaves_file_2,
                 &receipts_dir,
                 &verify,
             )
@@ -215,10 +243,12 @@ async fn main() -> Result<()> {
             compliance_definition,
             verifier_output,
             contract_dir,
-            merkle_root,
+            merkle_root_1,
+            merkle_root_2,
             t_start,
             t_end,
-            leaves_file,
+            leaves_file_1,
+            leaves_file_2,
         } => {
             commands::update_circuit::run(
                 circuit_dir,
@@ -228,10 +258,12 @@ async fn main() -> Result<()> {
                 &private_key,
                 &compliance_definition,
                 &contract_dir,
-                &merkle_root,
+                &merkle_root_1,
+                &merkle_root_2,
                 &t_start,
                 &t_end,
-                leaves_file,
+                leaves_file_1,
+                leaves_file_2,
                 &receipts_dir,
                 &verify,
             )
@@ -241,16 +273,20 @@ async fn main() -> Result<()> {
             compliance_definition,
             rpc_url,
             private_key,
-            merkle_root,
-            leaves_file,
+            merkle_root_1,
+            merkle_root_2,
+            leaves_file_1,
+            leaves_file_2,
         } => {
             commands::update_params::run(
                 &compliance_definition,
                 &ipfs_url,
                 &rpc_url,
                 &private_key,
-                &merkle_root,
-                leaves_file,
+                &merkle_root_1,
+                &merkle_root_2,
+                leaves_file_1,
+                leaves_file_2,
                 &receipts_dir,
             )
             .await

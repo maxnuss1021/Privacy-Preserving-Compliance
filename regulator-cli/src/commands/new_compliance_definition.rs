@@ -26,12 +26,14 @@ pub struct NewComplianceDefinitionData {
     pub source_file: String,
     pub cid: String,
     pub ipfs_size: String,
-    pub merkle_root: String,
+    pub merkle_root_1: String,
+    pub merkle_root_2: String,
     pub verifier_address: String,
     pub verifier_tx: String,
     pub verifier_verification: String,
     pub update_tx: String,
-    pub leaves_cid: String,
+    pub leaves_cid_1: String,
+    pub leaves_cid_2: String,
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -44,10 +46,12 @@ pub async fn run(
     private_key: &str,
     regulator: &str,
     contract_dir: &Path,
-    merkle_root: &str,
+    merkle_root_1: &str,
+    merkle_root_2: &str,
     t_start: &str,
     t_end: &str,
-    leaves_file: Option<PathBuf>,
+    leaves_file_1: Option<PathBuf>,
+    leaves_file_2: Option<PathBuf>,
     receipts_dir: &Path,
     verify: &VerifyArgs,
 ) -> Result<()> {
@@ -135,14 +139,27 @@ pub async fn run(
     eprintln!("  CID: {}", ipfs_response.hash);
 
     // ── Leaves Upload ────────────────────────────────────────────────
-    let leaves_cid = if let Some(ref leaves_path) = leaves_file {
-        eprintln!("  Uploading leaves file {}...", leaves_path.display());
+    let leaves_cid_1 = if let Some(ref leaves_path) = leaves_file_1 {
+        eprintln!("  Uploading leaves file 1 {}...", leaves_path.display());
         let leaves_response = ipfs::add_file(ipfs_rpc_url, leaves_path)
             .await
             .with_context(|| {
-                format!("failed to upload leaves file to IPFS at {ipfs_rpc_url}")
+                format!("failed to upload leaves file 1 to IPFS at {ipfs_rpc_url}")
             })?;
-        eprintln!("  Leaves CID: {}", leaves_response.hash);
+        eprintln!("  Leaves 1 CID: {}", leaves_response.hash);
+        leaves_response.hash
+    } else {
+        String::new()
+    };
+
+    let leaves_cid_2 = if let Some(ref leaves_path) = leaves_file_2 {
+        eprintln!("  Uploading leaves file 2 {}...", leaves_path.display());
+        let leaves_response = ipfs::add_file(ipfs_rpc_url, leaves_path)
+            .await
+            .with_context(|| {
+                format!("failed to upload leaves file 2 to IPFS at {ipfs_rpc_url}")
+            })?;
+        eprintln!("  Leaves 2 CID: {}", leaves_response.hash);
         leaves_response.hash
     } else {
         String::new()
@@ -190,9 +207,12 @@ pub async fn run(
     eprintln!("\nCompliance Registration");
     let cid = &ipfs_response.hash;
     let cd_addr = cd_result.deployed_to;
-    let merkle_root_bytes: FixedBytes<32> = merkle_root
+    let merkle_root_1_bytes: FixedBytes<32> = merkle_root_1
         .parse()
-        .with_context(|| format!("invalid merkle_root (expected bytes32): {merkle_root}"))?;
+        .with_context(|| format!("invalid merkle_root_1 (expected bytes32): {merkle_root_1}"))?;
+    let merkle_root_2_bytes: FixedBytes<32> = merkle_root_2
+        .parse()
+        .with_context(|| format!("invalid merkle_root_2 (expected bytes32): {merkle_root_2}"))?;
     let t_start_val: U256 = t_start
         .parse()
         .with_context(|| format!("invalid t_start (expected uint256): {t_start}"))?;
@@ -205,11 +225,13 @@ pub async fn run(
         &provider,
         cd_addr,
         verifier_result.deployed_to,
-        merkle_root_bytes,
+        merkle_root_1_bytes,
+        merkle_root_2_bytes,
         t_start_val,
         t_end_val,
         cid.to_string(),
-        leaves_cid.clone(),
+        leaves_cid_1.clone(),
+        leaves_cid_2.clone(),
     )
     .await?;
     eprintln!("  Transaction:  {update_tx_hash}");
@@ -219,7 +241,8 @@ pub async fn run(
     println!("compliance_definition={cd_addr}");
     println!("verifier_address={}", verifier_result.deployed_to);
     println!("cid={cid}");
-    println!("merkle_root={merkle_root}");
+    println!("merkle_root_1={merkle_root_1}");
+    println!("merkle_root_2={merkle_root_2}");
     println!("chain_id={chain_id}");
 
     let data = NewComplianceDefinitionData {
@@ -233,12 +256,14 @@ pub async fn run(
         source_file: source_file.display().to_string(),
         cid: cid.to_string(),
         ipfs_size: ipfs_response.size.clone(),
-        merkle_root: merkle_root.to_string(),
+        merkle_root_1: merkle_root_1.to_string(),
+        merkle_root_2: merkle_root_2.to_string(),
         verifier_address: verifier_result.deployed_to.to_string(),
         verifier_tx: verifier_result.transaction_hash.to_string(),
         verifier_verification: verifier_verification.to_string(),
         update_tx: update_tx_hash.to_string(),
-        leaves_cid,
+        leaves_cid_1,
+        leaves_cid_2,
     };
 
     let receipt = Receipt::new("new-compliance-definition", data);

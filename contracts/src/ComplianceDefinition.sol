@@ -27,8 +27,9 @@ contract ComplianceDefinition {
     /// @param tStart Block height at which this version becomes active.
     /// @param tEnd Block height at which this version expires.
     /// @param metadataHash IPFS content hash linking to the circuit to be proved
-    /// @param leavesHash IPFS content hash of the Merkle tree leaves, allowing users to
+    /// @param leavesHash IPFS content hash of the first Merkle tree leaves, allowing users to
     ///  reconstruct the tree and generate inclusion/exclusion proofs locally.
+    /// @param leavesHash2 IPFS content hash of the second Merkle tree leaves.
     struct ComplianceVersion {
         address verifier;
         bytes32 merkleRoot;
@@ -37,6 +38,7 @@ contract ComplianceDefinition {
         uint256 tEnd;
         string metadataHash;
         string leavesHash;
+        string leavesHash2;
     }
 
     /// @notice Append-only array of all compliance definition versions, serving as a
@@ -111,7 +113,8 @@ contract ComplianceDefinition {
     ///  future to allow publishing before the definition takes effect.
     /// @param tEnd Block height at which this version expires.
     /// @param metadataHash IPFS hash of the compliance circuit to be proved
-    /// @param leavesHash IPFS hash of the Merkle tree leaves.
+    /// @param leavesHash IPFS hash of the first Merkle tree leaves.
+    /// @param leavesHash2 IPFS hash of the second Merkle tree leaves.
     function updateCircuit(
         address newVerifier,
         bytes32 newMerkleRoot,
@@ -119,7 +122,8 @@ contract ComplianceDefinition {
         uint256 tStart,
         uint256 tEnd,
         string calldata metadataHash,
-        string calldata leavesHash
+        string calldata leavesHash,
+        string calldata leavesHash2
     ) external onlyRegulator {
         versions.push(
             ComplianceVersion({
@@ -129,7 +133,8 @@ contract ComplianceDefinition {
                 tStart: tStart,
                 tEnd: tEnd,
                 metadataHash: metadataHash,
-                leavesHash: leavesHash
+                leavesHash: leavesHash,
+                leavesHash2: leavesHash2
             })
         );
     }
@@ -140,11 +145,13 @@ contract ComplianceDefinition {
     ///  a sanction list. The circuit and verifier remain the same, so users only need to
     ///  re-prove constraints affected by the parameter change, not the entire definition.
     /// @param newMerkleRoot Merkle root of the updated public parameter set.
-    /// @param newLeavesHash IPFS hash of the updated Merkle tree leaves.
+    /// @param newLeavesHash IPFS hash of the updated first Merkle tree leaves.
+    /// @param newLeavesHash2 IPFS hash of the updated second Merkle tree leaves.
     function updateParams(
         bytes32 newMerkleRoot,
         bytes32 newMerkleRoot2,
-        string calldata newLeavesHash
+        string calldata newLeavesHash,
+        string calldata newLeavesHash2
     ) external onlyRegulator {
         ComplianceVersion memory current = getActiveVersion();
         versions.push(
@@ -155,7 +162,8 @@ contract ComplianceDefinition {
                 tStart: current.tStart,
                 tEnd: current.tEnd,
                 metadataHash: current.metadataHash,
-                leavesHash: newLeavesHash
+                leavesHash: newLeavesHash,
+                leavesHash2: newLeavesHash2
             })
         );
     }

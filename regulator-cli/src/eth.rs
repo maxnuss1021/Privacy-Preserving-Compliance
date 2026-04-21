@@ -15,15 +15,19 @@ sol! {
         function updateCircuit(
             address newVerifier,
             bytes32 newMerkleRoot,
+            bytes32 newMerkleRoot2,
             uint256 tStart,
             uint256 tEnd,
             string calldata metadataHash,
-            string calldata leavesHash
+            string calldata leavesHash,
+            string calldata leavesHash2
         ) external;
 
         function updateParams(
             bytes32 newMerkleRoot,
-            string calldata newLeavesHash
+            bytes32 newMerkleRoot2,
+            string calldata newLeavesHash,
+            string calldata newLeavesHash2
         ) external;
     }
 }
@@ -170,16 +174,18 @@ pub async fn call_update_circuit(
     provider: &(impl Provider<Ethereum> + Clone),
     compliance_definition_addr: Address,
     new_verifier: Address,
-    merkle_root: FixedBytes<32>,
+    merkle_root_1: FixedBytes<32>,
+    merkle_root_2: FixedBytes<32>,
     t_start: U256,
     t_end: U256,
     metadata_uri: String,
-    leaves_hash: String,
+    leaves_hash_1: String,
+    leaves_hash_2: String,
 ) -> Result<FixedBytes<32>> {
     let contract = ComplianceDefinition::new(compliance_definition_addr, provider);
 
     let pending_tx = contract
-        .updateCircuit(new_verifier, merkle_root, t_start, t_end, metadata_uri, leaves_hash)
+        .updateCircuit(new_verifier, merkle_root_1, merkle_root_2, t_start, t_end, metadata_uri, leaves_hash_1, leaves_hash_2)
         .send()
         .await
         .context("failed to broadcast updateCircuit transaction")?;
@@ -197,13 +203,15 @@ pub async fn call_update_circuit(
 pub async fn call_update_params(
     provider: &(impl Provider<Ethereum> + Clone),
     compliance_definition_addr: Address,
-    merkle_root: FixedBytes<32>,
-    leaves_hash: String,
+    merkle_root_1: FixedBytes<32>,
+    merkle_root_2: FixedBytes<32>,
+    leaves_hash_1: String,
+    leaves_hash_2: String,
 ) -> Result<FixedBytes<32>> {
     let contract = ComplianceDefinition::new(compliance_definition_addr, provider);
 
     let pending_tx = contract
-        .updateParams(merkle_root, leaves_hash)
+        .updateParams(merkle_root_1, merkle_root_2, leaves_hash_1, leaves_hash_2)
         .send()
         .await
         .context("failed to broadcast updateParams transaction")?;

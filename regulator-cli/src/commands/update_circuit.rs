@@ -21,13 +21,15 @@ pub struct UpdateCircuitData {
     pub verifier_path: String,
     pub cid: String,
     pub ipfs_size: String,
-    pub merkle_root: String,
+    pub merkle_root_1: String,
+    pub merkle_root_2: String,
     pub verifier_address: String,
     pub deploy_tx_hash: String,
     pub compliance_definition: String,
     pub update_tx_hash: String,
     pub verification_status: String,
-    pub leaves_cid: String,
+    pub leaves_cid_1: String,
+    pub leaves_cid_2: String,
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -39,10 +41,12 @@ pub async fn run(
     private_key: &str,
     compliance_definition: &str,
     contract_dir: &Path,
-    merkle_root: &str,
+    merkle_root_1: &str,
+    merkle_root_2: &str,
     t_start: &str,
     t_end: &str,
-    leaves_file: Option<PathBuf>,
+    leaves_file_1: Option<PathBuf>,
+    leaves_file_2: Option<PathBuf>,
     receipts_dir: &Path,
     verify: &VerifyArgs,
 ) -> Result<()> {
@@ -94,15 +98,28 @@ pub async fn run(
     })?;
     eprintln!("uploaded to IPFS");
 
-    // 5b. Upload leaves file if provided
-    let leaves_cid = if let Some(ref leaves_path) = leaves_file {
-        eprintln!("uploading leaves file {}...", leaves_path.display());
+    // 5b. Upload leaves files if provided
+    let leaves_cid_1 = if let Some(ref leaves_path) = leaves_file_1 {
+        eprintln!("uploading leaves file 1 {}...", leaves_path.display());
         let leaves_response = ipfs::add_file(ipfs_rpc_url, leaves_path)
             .await
             .with_context(|| {
-                format!("failed to upload leaves file to IPFS at {ipfs_rpc_url}")
+                format!("failed to upload leaves file 1 to IPFS at {ipfs_rpc_url}")
             })?;
-        eprintln!("leaves uploaded to IPFS: {}", leaves_response.hash);
+        eprintln!("leaves 1 uploaded to IPFS: {}", leaves_response.hash);
+        leaves_response.hash
+    } else {
+        String::new()
+    };
+
+    let leaves_cid_2 = if let Some(ref leaves_path) = leaves_file_2 {
+        eprintln!("uploading leaves file 2 {}...", leaves_path.display());
+        let leaves_response = ipfs::add_file(ipfs_rpc_url, leaves_path)
+            .await
+            .with_context(|| {
+                format!("failed to upload leaves file 2 to IPFS at {ipfs_rpc_url}")
+            })?;
+        eprintln!("leaves 2 uploaded to IPFS: {}", leaves_response.hash);
         leaves_response.hash
     } else {
         String::new()
@@ -155,9 +172,12 @@ pub async fn run(
     let cd_addr: Address = compliance_definition
         .parse()
         .with_context(|| format!("invalid compliance definition address: {compliance_definition}"))?;
-    let merkle_root_bytes: FixedBytes<32> = merkle_root
+    let merkle_root_1_bytes: FixedBytes<32> = merkle_root_1
         .parse()
-        .with_context(|| format!("invalid merkle_root (expected bytes32): {merkle_root}"))?;
+        .with_context(|| format!("invalid merkle_root_1 (expected bytes32): {merkle_root_1}"))?;
+    let merkle_root_2_bytes: FixedBytes<32> = merkle_root_2
+        .parse()
+        .with_context(|| format!("invalid merkle_root_2 (expected bytes32): {merkle_root_2}"))?;
     let t_start_val: U256 = t_start
         .parse()
         .with_context(|| format!("invalid t_start (expected uint256): {t_start}"))?;
@@ -170,11 +190,13 @@ pub async fn run(
         &provider,
         cd_addr,
         deploy_result.deployed_to,
-        merkle_root_bytes,
+        merkle_root_1_bytes,
+        merkle_root_2_bytes,
         t_start_val,
         t_end_val,
         cid.to_string(),
-        leaves_cid.clone(),
+        leaves_cid_1.clone(),
+        leaves_cid_2.clone(),
     )
     .await?;
     eprintln!("compliance version registered");
@@ -183,7 +205,8 @@ pub async fn run(
     println!("deploy_tx_hash={}", deploy_result.transaction_hash);
     println!("update_tx_hash={update_tx_hash}");
     println!("cid={cid}");
-    println!("merkle_root={merkle_root}");
+    println!("merkle_root_1={merkle_root_1}");
+    println!("merkle_root_2={merkle_root_2}");
     println!("chain_id={chain_id}");
     println!("verification={verification}");
 
@@ -194,13 +217,15 @@ pub async fn run(
         verifier_path: verifier_path.display().to_string(),
         cid: cid.to_string(),
         ipfs_size: response.size,
-        merkle_root: merkle_root.to_string(),
+        merkle_root_1: merkle_root_1.to_string(),
+        merkle_root_2: merkle_root_2.to_string(),
         verifier_address: deploy_result.deployed_to.to_string(),
         deploy_tx_hash: deploy_result.transaction_hash.to_string(),
         compliance_definition: compliance_definition.to_string(),
         update_tx_hash: update_tx_hash.to_string(),
         verification_status: verification.to_string(),
-        leaves_cid,
+        leaves_cid_1,
+        leaves_cid_2,
     };
 
     let receipt = Receipt::new("update-circuit", data);
